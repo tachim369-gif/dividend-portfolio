@@ -495,11 +495,20 @@ const SK='divpf_v5';
 let portfolio=[],watchlist=[],nextId=1,curId=null,curList=null,hChart=null,buyTargetId=null;
 
 /* ── Storage ── */
-function save(){localStorage.setItem(SK,JSON.stringify({portfolio,watchlist,nextId}));}
+function save(){
+  const fxRate=document.getElementById('fx-rate').value;
+  localStorage.setItem(SK,JSON.stringify({portfolio,watchlist,nextId,fxRate}));
+}
 function load(){
   try{
     const d=JSON.parse(localStorage.getItem(SK));
-    if(d){portfolio=d.portfolio||[];watchlist=d.watchlist||[];nextId=d.nextId||1;return;}
+    if(d){
+      portfolio=d.portfolio||[];
+      watchlist=d.watchlist||[];
+      nextId=d.nextId||1;
+      if(d.fxRate) document.getElementById('fx-rate').value=d.fxRate;
+      return;
+    }
   }catch(e){}
   // Sample data
   const y=new Date().getFullYear();
