@@ -11,13 +11,26 @@ exports.handler = async function(event) {
 
   try {
     const { codes } = JSON.parse(event.body || '{}');
-    if (!codes || !codes.length) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'No codes provided' }) };
-    }
-
     const prices = {};
 
-    for (const { code, market } of codes) {
+    // 為替レート取得
+    try {
+      const fxRes = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/USDJPY=X?interval=1d&range=1d', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': '*/*',
+          'Referer': 'https://finance.yahoo.com'
+        }
+      });
+      const fxData = await fxRes.json();
+      const fxRate = fxData?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      if (fxRate) prices['USDJPY'] = fxRate;
+    } catch(e) {
+      console.warn('FX fetch failed:', e.message);
+    }
+
+    // 株価取得
+    for (const { code, market } of (codes || [])) {
       try {
         const symbol = market === 'jp' ? code + '.T' : code;
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=5d`;
@@ -25,7 +38,6 @@ exports.handler = async function(event) {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': '*/*',
-            'Accept-Language': 'en-US,en;q=0.9',
             'Referer': 'https://finance.yahoo.com'
           }
         });
@@ -33,7 +45,6 @@ exports.handler = async function(event) {
         const meta = data?.chart?.result?.[0]?.meta;
         const price = meta?.regularMarketPrice || meta?.previousClose;
         if (price) prices[code] = price;
-        else console.log(`No price for ${symbol}:`, JSON.stringify(meta));
       } catch(e) {
         console.warn(`Failed ${code}:`, e.message);
       }
