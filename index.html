@@ -811,6 +811,13 @@ async function updateAllPrices(){
     });
     const data=await res.json();
     const prices=data.prices||{};
+
+    // 為替レート自動反映
+    if(prices['USDJPY']){
+      const fxRate=Math.round(parseFloat(prices['USDJPY'])*100)/100;
+      document.getElementById('fx-rate').value=fxRate;
+    }
+
     let updated=0;
     allRows.forEach(r=>{
       if(prices[r.code]!=null){
