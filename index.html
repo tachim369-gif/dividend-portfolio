@@ -652,6 +652,11 @@ function getList(name){return name==='portfolio'?portfolio:watchlist;}
 function updRow(listName,id,field,val){
   const list=getList(listName);
   const r=list.find(x=>x.id===id);if(!r)return;
+  if(field==='code'){
+    // 同じコードが既に存在する場合は重複追加しない
+    const dup=list.find(x=>x.id!==id&&x.code===val.trim());
+    if(dup){alert(`${val}はすでに登録されています`);return;}
+  }
   if(['shares','buyPrice','mktPrice'].includes(field))r[field]=parseFloat(val)||0;
   else r[field]=val;
   refreshRowUI(listName,r);save();
@@ -996,12 +1001,20 @@ async function autoFetchName(listName,id,code){
   const nameBtn=document.getElementById(`name-btn-${id}`);
   if(nameBtn)nameBtn.textContent='取得中...';
   try{
-    await fetchAndApply(r);
+    // 30秒でタイムアウト
+    await Promise.race([
+      fetchAndApply(r),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),30000))
+    ]);
     save();
     renderPortfolio();
   }catch(e){
-    if(nameBtn)nameBtn.textContent=code;
     console.warn('取得失敗',e);
+  }finally{
+    const btn=document.getElementById(`name-btn-${id}`);
+    if(btn&&btn.textContent==='取得中...'){
+      btn.textContent=r.name||code;
+    }
   }
 }
 
