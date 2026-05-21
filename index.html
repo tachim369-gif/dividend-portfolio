@@ -992,23 +992,16 @@ async function autoFetchName(listName,id,code){
   if(!code)return;
   const list=getList(listName);
   const r=list.find(x=>x.id===id);
-  if(!r||!code)return; // コードがなければ取得しない
+  if(!r||!code)return;
   const nameBtn=document.getElementById(`name-btn-${id}`);
   if(nameBtn)nameBtn.textContent='取得中...';
   try{
-    const isJp=/^\d{4}$/.test(code);
-    const prompt=isJp
-      ?`証券コード${code}の日本株の正式銘柄名を教えてください。銘柄名だけを返してください。例：トヨタ自動車`
-      :`What is the company name for stock ticker ${code}? Return only the company name, nothing else. Example: Apple Inc.`;
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:50,messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();
-    const name=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
-    if(name){r.name=name;save();renderPortfolio();}
+    await fetchAndApply(r);
+    save();
+    renderPortfolio();
   }catch(e){
     if(nameBtn)nameBtn.textContent=code;
-    console.warn('銘柄名取得失敗',e);
+    console.warn('取得失敗',e);
   }
 }
 
