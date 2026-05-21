@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ja"><head><meta charset="UTF-8">
+<!-- saved from url=(0044)https://benevolent-froyo-f6fc50.netlify.app/ -->
+<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>配当ポートフォリオ管理</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231a1917'/><rect x='4' y='20' width='5' height='8' rx='1' fill='%231a6b3c'/><rect x='11' y='14' width='5' height='14' rx='1' fill='%231a6b3c'/><rect x='18' y='8' width='5' height='20' rx='1' fill='%234caf7d'/><rect x='25' y='4' width='5' height='24' rx='1' fill='%234caf7d'/><line x1='3' y1='28' x2='29' y2='28' stroke='%23a09e98' stroke-width='1.5'/></svg>">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="./配当ポートフォリオ管理_files/css2" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,&lt;svg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;&gt;&lt;rect width=&#39;32&#39; height=&#39;32&#39; rx=&#39;6&#39; fill=&#39;%231a1917&#39;/&gt;&lt;rect x=&#39;4&#39; y=&#39;20&#39; width=&#39;5&#39; height=&#39;8&#39; rx=&#39;1&#39; fill=&#39;%231a6b3c&#39;/&gt;&lt;rect x=&#39;11&#39; y=&#39;14&#39; width=&#39;5&#39; height=&#39;14&#39; rx=&#39;1&#39; fill=&#39;%231a6b3c&#39;/&gt;&lt;rect x=&#39;18&#39; y=&#39;8&#39; width=&#39;5&#39; height=&#39;20&#39; rx=&#39;1&#39; fill=&#39;%234caf7d&#39;/&gt;&lt;rect x=&#39;25&#39; y=&#39;4&#39; width=&#39;5&#39; height=&#39;24&#39; rx=&#39;1&#39; fill=&#39;%234caf7d&#39;/&gt;&lt;line x1=&#39;3&#39; y1=&#39;28&#39; x2=&#39;29&#39; y2=&#39;28&#39; stroke=&#39;%23a09e98&#39; stroke-width=&#39;1.5&#39;/&gt;&lt;/svg&gt;">
+<script src="./配当ポートフォリオ管理_files/chart.umd.min.js.ダウンロード"></script>
 <style>
 :root{
   --bg:#f5f4f0;--surface:#fff;--surface2:#f0eeea;--border:#dddbd5;--border2:#c8c5bd;
@@ -24,14 +25,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;}
 .h-title{font-size:15px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
 .h-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
-.h-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.h-right{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
 .fx-label{font-size:12px;color:var(--text2);}
 .fx-input{font-family:var(--mono);font-size:13px;width:88px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);color:var(--text);text-align:right;}
 .fx-input:focus{outline:none;border-color:var(--border2);}
 .price-update-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);cursor:pointer;transition:all .15s;white-space:nowrap;}
 .price-update-btn:hover{background:var(--surface);border-color:var(--border2);color:var(--text);}
 .price-update-btn:disabled{opacity:.5;cursor:not-allowed;}
-.last-updated{font-size:11px;color:var(--text3);}
+.last-updated{display:none;}
 
 /* Tabs */
 .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);padding:0 24px;}
@@ -92,7 +93,8 @@ td:nth-child(-n+3){text-align:left;font-family:var(--sans);font-size:13px;}
 td input{font-family:var(--mono);font-size:13px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);width:100%;padding:2px 0;text-align:right;transition:border-color .15s;}
 td input.left{text-align:left;font-family:var(--sans);}
 td input:focus{outline:none;border-bottom-color:var(--border2);}
-.name-cell{display:flex;align-items:center;gap:6px;}
+.name-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--text);text-align:left;padding:4px 10px;transition:all .15s;text-decoration:none;}
+.name-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--accent2);}
 .detail-btn{background:none;border:1px solid var(--border);cursor:pointer;color:var(--text3);font-size:11px;padding:2px 7px;border-radius:4px;transition:all .15s;white-space:nowrap;font-family:var(--sans);}
 .detail-btn:hover{background:var(--accent2-bg);color:var(--accent2);border-color:#b8d4f0;}
 .buy-btn{background:none;border:1px solid #b4dcc6;cursor:pointer;color:var(--accent);font-size:11px;padding:2px 8px;border-radius:4px;transition:all .15s;white-space:nowrap;font-family:var(--sans);font-weight:500;}
@@ -194,17 +196,17 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
     <span class="fx-label">USD/JPY</span>
     <input type="number" class="fx-input" id="fx-rate" value="155" min="100" max="300" step="0.1">
     <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
-    <button class="price-update-btn" id="price-btn" onclick="updateAllPrices()" style="flex-shrink:0;white-space:nowrap;">
+    <button class="price-update-btn" id="price-btn" onclick="updateAllPrices()" style="flex-shrink:0;white-space:nowrap;min-width:180px;justify-content:center;">
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"></polyline><path d="M1,1 A7,7 0 1,1 0,8"></path></svg>
-      株価を更新
+      <span id="price-btn-label">株価を更新</span>
     </button>
-    <span class="last-updated" id="last-updated" style="white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;"></span>
+    <span class="last-updated" id="last-updated"></span>
   </div>
 </header>
 
 <div class="tabs">
   <div class="tab active" onclick="switchTab(&#39;portfolio&#39;)" id="tab-portfolio">
-    保有銘柄 <span class="tab-badge" id="badge-portfolio">4</span>
+    保有銘柄 <span class="tab-badge" id="badge-portfolio">3</span>
   </div>
   <div class="tab" onclick="switchTab(&#39;watch&#39;)" id="tab-watch">
     ウォッチリスト <span class="tab-badge" id="badge-watch">1</span>
@@ -218,23 +220,23 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
   <div class="sum-grid">
     <div class="sum-card primary">
       <div class="sum-lbl">年間配当収入・合計（円）</div>
-      <div class="sum-val" id="total-annual">18,200</div>
+      <div class="sum-val" id="total-annual">18,282</div>
       <div class="sum-sub">税引前・概算・円換算</div>
     </div>
     <div class="sum-card">
       <div class="sum-lbl">日本株（円）</div>
       <div class="sum-val" id="jp-annual">15,100</div>
-      <div class="sum-sub" id="jp-count">3銘柄</div>
+      <div class="sum-sub" id="jp-count">2銘柄</div>
     </div>
     <div class="sum-card">
       <div class="sum-lbl">米国株・円換算</div>
-      <div class="sum-val" id="us-annual">3,100</div>
+      <div class="sum-val" id="us-annual">3,182</div>
       <div class="sum-sub" id="us-count">1銘柄</div>
     </div>
     <div class="sum-card">
       <div class="sum-lbl">含み損益（概算）</div>
-      <div class="sum-val" id="total-gain">—</div>
-      <div class="sum-sub" id="total-gain-sub">実勢単価更新で計算</div>
+      <div class="sum-val up" id="total-gain">573,227</div>
+      <div class="sum-sub" id="total-gain-sub">含み益（円）</div>
     </div>
   </div>
 
@@ -259,95 +261,10 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 
   <div class="table-wrap">
     <table style="table-layout:fixed;">
-      <thead>
-        <tr>
-          <th style="width:52px;text-align:left;"></th>
-          <th style="width:76px;text-align:left;">コード</th>
-          <th style="text-align:left;">銘柄名</th>
-          <th style="width:84px;text-align:right;" class="hm">保有株数</th>
-          <th style="width:96px;text-align:right;" class="hm">購入単価(円/$)</th>
-          <th style="width:96px;text-align:right;" class="hm">実勢単価(円/$)</th>
-          <th style="width:92px;text-align:right;" class="hm">含み損益(円)</th>
-          <th style="width:96px;text-align:right;">年間配当/株(円/$)</th>
-          <th style="width:76px;text-align:right;" title="購入単価基準">利回り·買(%)</th>
-          <th style="width:76px;text-align:right;" class="hm" title="実勢単価基準">利回り·現(%)</th>
-          <th style="width:100px;text-align:right;">年間配当計(円)</th>
-          <th style="width:36px;"></th>
-        </tr>
-      </thead>
-      <tbody id="portfolio-body"><tr data-id="1">
-      <td style="text-align:left;"><span class="badge badge-jp">JP <span class="badge-cur">¥</span></span></td>
-      <td style="text-align:left;"><input type="text" class="left" value="7203" placeholder="コード" onchange="updRow(&#39;portfolio&#39;,1,&#39;code&#39;,this.value)" onfocus="this.select()"></td>
-      <td style="text-align:left;"><div class="name-cell">
-        <input type="text" class="left" value="トヨタ自動車" placeholder="銘柄名" onchange="updRow(&#39;portfolio&#39;,1,&#39;name&#39;,this.value)" onfocus="this.select()" style="flex:1;min-width:0;">
-        <button class="detail-btn" onclick="openModal(&#39;portfolio&#39;,1)">詳細 ↗</button>
-      </div></td>
-      <td class="hm"><input type="number" value="100" placeholder="0" min="0" oninput="updRow(&#39;portfolio&#39;,1,&#39;shares&#39;,this.value)" onfocus="this.select()"></td>
-      <td class="hm"><input type="number" value="2500" placeholder="0" min="0" step="0.01" oninput="updRow(&#39;portfolio&#39;,1,&#39;buyPrice&#39;,this.value)" onfocus="this.select()"></td>
-      <td class="hm" id="mkt-1">2,940</td>
-      <td class="hm" id="gain-1" style="font-family:var(--mono);font-size:13px;color:var(--accent);">44,000</td>
-      <td><span class="mono-cell" id="adiv-1">90</span></td>
-      <td class="yld-buy" id="ybuy-1">3.60%</td>
-      <td class="yld-mkt hm" id="ymkt-1">3.06%</td>
-      <td class="bold-cell" id="ann-1">9,000</td>
-      <td style="text-align:center;"><button class="del-btn" onclick="delRow(&#39;portfolio&#39;,1)">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,4 14,4"></polyline><path d="M5,4V2h6v2"></path><path d="M6,7v5M10,7v5"></path><rect x="3" y="4" width="10" height="10" rx="1"></rect></svg>
-      </button></td>
-    </tr><tr data-id="2">
-      <td style="text-align:left;"><span class="badge badge-jp">JP <span class="badge-cur">¥</span></span></td>
-      <td style="text-align:left;"><input type="text" class="left" value="8316" placeholder="コード" onchange="updRow(&#39;portfolio&#39;,2,&#39;code&#39;,this.value)" onfocus="this.select()"></td>
-      <td style="text-align:left;"><div class="name-cell">
-        <input type="text" class="left" value="三井住友FG" placeholder="銘柄名" onchange="updRow(&#39;portfolio&#39;,2,&#39;name&#39;,this.value)" onfocus="this.select()" style="flex:1;min-width:0;">
-        <button class="detail-btn" onclick="openModal(&#39;portfolio&#39;,2)">詳細 ↗</button>
-      </div></td>
-      <td class="hm"><input type="number" value="50" placeholder="0" min="0" oninput="updRow(&#39;portfolio&#39;,2,&#39;shares&#39;,this.value)" onfocus="this.select()"></td>
-      <td class="hm"><input type="number" value="4800" placeholder="0" min="0" step="0.01" oninput="updRow(&#39;portfolio&#39;,2,&#39;buyPrice&#39;,this.value)" onfocus="this.select()"></td>
-      <td class="hm" id="mkt-2">5,850</td>
-      <td class="hm" id="gain-2" style="font-family:var(--mono);font-size:13px;color:var(--accent);">52,500</td>
-      <td><span class="mono-cell" id="adiv-2">122</span></td>
-      <td class="yld-buy" id="ybuy-2">2.54%</td>
-      <td class="yld-mkt hm" id="ymkt-2">2.09%</td>
-      <td class="bold-cell" id="ann-2">6,100</td>
-      <td style="text-align:center;"><button class="del-btn" onclick="delRow(&#39;portfolio&#39;,2)">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,4 14,4"></polyline><path d="M5,4V2h6v2"></path><path d="M6,7v5M10,7v5"></path><rect x="3" y="4" width="10" height="10" rx="1"></rect></svg>
-      </button></td>
-    </tr><tr data-id="3">
-      <td style="text-align:left;"><span class="badge badge-us">US <span class="badge-cur">$</span></span></td>
-      <td style="text-align:left;"><input type="text" class="left" value="AAPL" placeholder="コード" onchange="updRow(&#39;portfolio&#39;,3,&#39;code&#39;,this.value)" onfocus="this.select()"></td>
-      <td style="text-align:left;"><div class="name-cell">
-        <input type="text" class="left" value="Apple" placeholder="銘柄名" onchange="updRow(&#39;portfolio&#39;,3,&#39;name&#39;,this.value)" onfocus="this.select()" style="flex:1;min-width:0;">
-        <button class="detail-btn" onclick="openModal(&#39;portfolio&#39;,3)">詳細 ↗</button>
-      </div></td>
-      <td class="hm"><input type="number" value="20" placeholder="0" min="0" oninput="updRow(&#39;portfolio&#39;,3,&#39;shares&#39;,this.value)" onfocus="this.select()"></td>
-      <td class="hm"><input type="number" value="150" placeholder="0" min="0" step="0.01" oninput="updRow(&#39;portfolio&#39;,3,&#39;buyPrice&#39;,this.value)" onfocus="this.select()"></td>
-      <td class="hm" id="mkt-3">$185.00</td>
-      <td class="hm" id="gain-3" style="font-family:var(--mono);font-size:13px;color:var(--accent);">108,500</td>
-      <td><span class="mono-cell" id="adiv-3">$1.00</span></td>
-      <td class="yld-buy" id="ybuy-3">0.67%</td>
-      <td class="yld-mkt hm" id="ymkt-3">0.54%</td>
-      <td class="bold-cell" id="ann-3">3,100</td>
-      <td style="text-align:center;"><button class="del-btn" onclick="delRow(&#39;portfolio&#39;,3)">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,4 14,4"></polyline><path d="M5,4V2h6v2"></path><path d="M6,7v5M10,7v5"></path><rect x="3" y="4" width="10" height="10" rx="1"></rect></svg>
-      </button></td>
-    </tr><tr data-id="5">
-      <td style="text-align:left;"><span class="badge badge-jp">JP <span class="badge-cur">¥</span></span></td>
-      <td style="text-align:left;"><input type="text" class="left" value="" placeholder="コード" onchange="updRow(&#39;portfolio&#39;,5,&#39;code&#39;,this.value)" onfocus="this.select()"></td>
-      <td style="text-align:left;"><div class="name-cell">
-        <input type="text" class="left" value="" placeholder="銘柄名" onchange="updRow(&#39;portfolio&#39;,5,&#39;name&#39;,this.value)" onfocus="this.select()" style="flex:1;min-width:0;">
-        <button class="detail-btn" onclick="openModal(&#39;portfolio&#39;,5)">詳細 ↗</button>
-      </div></td>
-      <td class="hm"><input type="number" value="" placeholder="0" min="0" oninput="updRow(&#39;portfolio&#39;,5,&#39;shares&#39;,this.value)" onfocus="this.select()"></td>
-      <td class="hm"><input type="number" value="" placeholder="0" min="0" step="0.01" oninput="updRow(&#39;portfolio&#39;,5,&#39;buyPrice&#39;,this.value)" onfocus="this.select()"></td>
-      <td class="hm" id="mkt-5"><span class="price-loading">未取得</span></td>
-      <td class="hm" id="gain-5" style="font-family:var(--mono);font-size:13px;color:var(--text3);">—</td>
-      <td><span class="mono-cell" id="adiv-5">—</span></td>
-      <td class="yld-buy" id="ybuy-5">—</td>
-      <td class="yld-mkt hm" id="ymkt-5">—</td>
-      <td class="bold-cell" id="ann-5">—</td>
-      <td style="text-align:center;"><button class="del-btn" onclick="delRow(&#39;portfolio&#39;,5)">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,4 14,4"></polyline><path d="M5,4V2h6v2"></path><path d="M6,7v5M10,7v5"></path><rect x="3" y="4" width="10" height="10" rx="1"></rect></svg>
-      </button></td>
-    </tr></tbody>
+      <colgroup>
+        <col style="width:76px;"><col><col style="width:84px;"><col style="width:96px;"><col style="width:96px;"><col style="width:92px;"><col style="width:96px;"><col style="width:76px;"><col style="width:76px;"><col style="width:100px;"><col style="width:36px;">
+      </colgroup>
+      <tbody id="portfolio-body"></tbody>
     </table>
   </div>
   <div class="footer-note">
@@ -393,7 +310,7 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
         <span style="flex:1;">ソフトバンクG</span>
         <button class="detail-btn" onclick="openModal(&#39;watch&#39;,4)">詳細 ↗</button>
       </div></td>
-      <td class="hm" id="wmkt-4"><span class="price-loading">未取得</span></td>
+      <td class="hm" id="wmkt-4">5,361</td>
       <td><span class="mono-cell">—</span></td>
       <td class="yld-mkt">—</td>
       <td class="bold-cell">—</td>
@@ -613,10 +530,10 @@ function endEdit(input,id,field){
 function renderPortfolio(){
   const tb=document.getElementById('portfolio-body');
   if(!portfolio.length){
-    tb.innerHTML='<tr><td colspan="12" class="empty-state">銘柄を追加するか、楽天証券CSVを読み込んでください</td></tr>';
+    tb.innerHTML='<tr><td colspan="11" class="empty-state">銘柄を追加するか、楽天証券CSVを読み込んでください</td></tr>';
     updateTotals();return;
   }
-  tb.innerHTML=portfolio.map(r=>{
+  const mkRow=r=>{
     const badge=r.market==='jp'
       ?'<span class="badge badge-jp">JP <span class="badge-cur">¥</span></span>'
       :'<span class="badge badge-us">US <span class="badge-cur">$</span></span>';
@@ -627,25 +544,65 @@ function renderPortfolio(){
     const g=gainJpy(r);
     const mktStr=r.mktPrice?fmtPrice(r,r.mktPrice):'<span class="price-loading">未取得</span>';
     return`<tr data-id="${r.id}">
-      <td style="text-align:left;">${badge}</td>
-      <td style="text-align:left;"><input type="text" class="left" value="${r.code||''}" placeholder="コード" onchange="updRow('portfolio',${r.id},'code',this.value)" onfocus="this.select()"></td>
-      <td style="text-align:left;"><div class="name-cell">
-        <input type="text" class="left" value="${r.name||''}" placeholder="銘柄名" onchange="updRow('portfolio',${r.id},'name',this.value)" onfocus="this.select()" style="flex:1;min-width:0;">
-        <button class="detail-btn" onclick="openModal('portfolio',${r.id})">詳細 ↗</button>
-      </div></td>
+      <td style="text-align:left;"><input type="text" class="left" value="${r.code||''}" placeholder="コード" onchange="updRow('portfolio',${r.id},'code',this.value)" onblur="autoFetchName('portfolio',${r.id},this.value)" onfocus="this.select()"></td>
+      <td style="text-align:left;">
+        <button class="name-btn" id="name-btn-${r.id}" onclick="openModal('portfolio',${r.id})">${r.name||(r.code?'取得中...':'—')}</button>
+      </td>
       <td class="hm" id="shares-cell-${r.id}" onclick="startEdit(this,${r.id},'shares')" style="cursor:text;">${r.shares?r.shares.toLocaleString('ja-JP'):'—'}</td>
       <td class="hm" id="buyprice-cell-${r.id}" onclick="startEdit(this,${r.id},'buyPrice')" style="cursor:text;">${r.buyPrice?fmtPrice(r,r.buyPrice):'—'}</td>
       <td class="hm" id="mkt-${r.id}">${mktStr}</td>
       <td class="hm" id="gain-${r.id}" style="font-family:var(--mono);font-size:13px;color:${g!==null?(g>=0?'var(--accent)':'var(--danger)'):'var(--text3)'};">${g!==null?fmtJpy(g):'—'}</td>
       <td><span class="mono-cell" id="adiv-${r.id}">${adiv>0?adivStr:'—'}</span></td>
-      <td class="yld-buy" id="ybuy-${r.id}">${yb!==null?yb.toFixed(2):'—'}</td>
-      <td class="yld-mkt hm" id="ymkt-${r.id}">${ym!==null?ym.toFixed(2):'—'}</td>
+      <td class="yld-buy" id="ybuy-${r.id}">${yb!==null?yb.toFixed(2)+'%':'—'}</td>
+      <td class="yld-mkt hm" id="ymkt-${r.id}">${ym!==null?ym.toFixed(2)+'%':'—'}</td>
       <td class="bold-cell" id="ann-${r.id}">${ann>0?fmtJpy(ann):'—'}</td>
       <td style="text-align:center;"><button class="del-btn" onclick="delRow('portfolio',${r.id})">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,4 14,4"/><path d="M5,4V2h6v2"/><path d="M6,7v5M10,7v5"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
       </button></td>
     </tr>`;
-  }).join('');
+  };
+  const jpRows=portfolio.filter(r=>r.market==='jp');
+  const usRows=portfolio.filter(r=>r.market==='us');
+  const colHdJp=`<tr style="background:var(--surface2);">
+    <th style="width:76px;text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">コード</th>
+    <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">銘柄名</th>
+    <th style="width:84px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">保有株数</th>
+    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">購入単価(円)</th>
+    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢単価(円)</th>
+    <th style="width:92px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">含み損益(円)</th>
+    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当(円)</th>
+    <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">購入利回り</th>
+    <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢利回り</th>
+    <th style="width:100px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当計(円)</th>
+    <th style="width:36px;border-bottom:1px solid var(--border);"></th>
+  </tr>`;
+  const colHdUs=`<tr style="background:var(--surface2);">
+    <th style="width:76px;text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">コード</th>
+    <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">銘柄名</th>
+    <th style="width:84px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">保有株数</th>
+    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">購入単価($)</th>
+    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢単価($)</th>
+    <th style="width:92px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">含み損益(円)</th>
+    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当($)</th>
+    <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">購入利回り</th>
+    <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢利回り</th>
+    <th style="width:100px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当計(円)</th>
+    <th style="width:36px;border-bottom:1px solid var(--border);"></th>
+  </tr>`;
+  const sectionHd=(label,color)=>`<tr><td colspan="11" style="padding:14px 8px 6px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:${color};border-bottom:2px solid ${color};background:transparent;">${label}</td></tr>`;
+  let html='';
+  if(jpRows.length){
+    html+=sectionHd('🇯🇵 日本株','var(--accent2)');
+    html+=colHdJp;
+    html+=jpRows.map(mkRow).join('');
+  }
+  if(usRows.length){
+    if(jpRows.length) html+=`<tr><td colspan="11" style="height:16px;background:transparent;border:none;"></td></tr>`;
+    html+=sectionHd('🇺🇸 米国株','var(--accent)');
+    html+=colHdUs;
+    html+=usRows.map(mkRow).join('');
+  }
+  tb.innerHTML=html;
   updateTotals();
 }
 
@@ -708,8 +665,8 @@ function refreshRowUI(listName,r){
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
     const setHtml=(id,v)=>{const e=document.getElementById(id);if(e)e.innerHTML=v;};
     set('adiv-'+r.id,adiv>0?adivStr:'—');
-    set('ybuy-'+r.id,yb!==null?yb.toFixed(2):'—');
-    set('ymkt-'+r.id,ym!==null?ym.toFixed(2):'—');
+    set('ybuy-'+r.id,yb!==null?yb.toFixed(2)+'%':'—');
+    set('ymkt-'+r.id,ym!==null?ym.toFixed(2)+'%':'—');
     set('ann-'+r.id,ann>0?fmtJpy(ann):'—');
     const ge=document.getElementById('gain-'+r.id);
     if(ge){
@@ -806,11 +763,10 @@ async function updateAllPrices(){
   const btn=document.getElementById('price-btn');
   const lastUpdated=document.getElementById('last-updated');
   btn.disabled=true;
-  btn.innerHTML='<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"/><path d="M1,1 A7,7 0 1,1 0,8"/></svg> 取得中...';
+  document.getElementById('price-btn-label').textContent='取得中...';
   const allRows=[...portfolio,...watchlist].filter(r=>r.code);
   if(!allRows.length){btn.disabled=false;return;}
 
-  lastUpdated.textContent='株価を取得中...';
 
   try{
     const codes=allRows.map(r=>({code:r.code,market:r.market}));
@@ -838,13 +794,12 @@ async function updateAllPrices(){
     });
     save();render();
     const now=new Date();
-    lastUpdated.textContent=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 更新（${updated}銘柄）`;
+    document.getElementById('price-btn-label').textContent=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 更新済`;
   }catch(e){
     console.error(e);
-    lastUpdated.textContent='取得失敗。再度お試しください。';
+    document.getElementById('price-btn-label').textContent='取得失敗';
   }
   btn.disabled=false;
-  btn.innerHTML='<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"/><path d="M1,1 A7,7 0 1,1 0,8"/></svg> 株価を更新';
 }
 
 async function aiCall(prompt){
@@ -1031,6 +986,32 @@ function closeModal(){
 function closeOut(e){if(e.target===document.getElementById('overlay'))closeModal();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeBuyDialog();}});
 
+/* ── AI 銘柄名自動取得 ── */
+async function autoFetchName(listName,id,code){
+  code=code.trim();
+  if(!code)return;
+  const list=getList(listName);
+  const r=list.find(x=>x.id===id);
+  if(!r||!code)return; // コードがなければ取得しない
+  const nameBtn=document.getElementById(`name-btn-${id}`);
+  if(nameBtn)nameBtn.textContent='取得中...';
+  try{
+    const isJp=/^\d{4}$/.test(code);
+    const prompt=isJp
+      ?`証券コード${code}の日本株の正式銘柄名を教えてください。銘柄名だけを返してください。例：トヨタ自動車`
+      :`What is the company name for stock ticker ${code}? Return only the company name, nothing else. Example: Apple Inc.`;
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:50,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const name=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+    if(name){r.name=name;save();renderPortfolio();}
+  }catch(e){
+    if(nameBtn)nameBtn.textContent=code;
+    console.warn('銘柄名取得失敗',e);
+  }
+}
+
 /* ── AI Fetch ── */
 async function aiFetchSingle(){
   const list=getList(curList);const r=list.find(x=>x.id===curId);if(!r)return;
@@ -1136,4 +1117,5 @@ load();render();
 </script>
 
 
-</body></html>
+
+<div id="trend_notification_app" class="trend_notification_app_outer"><div id="trend_notification"><div id="trend_notification_con"></div></div></div><div id="UMS_TOOLTIP" style="position: absolute; cursor: pointer; z-index: 2147483647; background: transparent; top: -100000px; left: -100000px;"></div></body><umsdataelement id="UMSDataElement" style="display: none;"></umsdataelement><div id="tmtoolbar_manual_rating_injected" style="display: none;">init</div><div id="UMSSendDataEventElement" style="display: none;">init</div></html>
