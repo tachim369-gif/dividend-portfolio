@@ -997,11 +997,12 @@ async function autoFetchName(listName,id,code){
   if(!code)return;
   const list=getList(listName);
   const r=list.find(x=>x.id===id);
-  if(!r||!code)return;
+  if(!r)return;
+  r.code=code; // onblurのタイミングでupdRowより先にcodeをセット
+  save();
   const nameBtn=document.getElementById(`name-btn-${id}`);
   if(nameBtn)nameBtn.textContent='取得中...';
   try{
-    // 30秒でタイムアウト
     await Promise.race([
       fetchAndApply(r),
       new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),30000))
