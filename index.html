@@ -205,7 +205,7 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
     <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
     <button class="price-update-btn" id="price-btn" onclick="updateAllPrices()" style="flex-shrink:0;white-space:nowrap;min-width:180px;justify-content:center;">
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"></polyline><path d="M1,1 A7,7 0 1,1 0,8"></path></svg>
-      <span id="price-btn-label">株価を更新</span>
+      <span id="price-btn-label">株価更新</span>
     </button>
     <span class="last-updated" id="last-updated"></span>
   </div>
@@ -249,21 +249,16 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 
   <div class="toolbar">
     <button class="btn btn-jp" onclick="addRow(&#39;portfolio&#39;,&#39;jp&#39;)">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"></line><line x1="2" y1="8" x2="14" y2="8"></line></svg>日本株を追加
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"></line><line x1="2" y1="8" x2="14" y2="8"></line></svg>日本株
     </button>
     <button class="btn btn-us" onclick="addRow(&#39;portfolio&#39;,&#39;us&#39;)">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"></line><line x1="2" y1="8" x2="14" y2="8"></line></svg>米国株を追加
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"></line><line x1="2" y1="8" x2="14" y2="8"></line></svg>米国株
     </button>
     <button class="btn btn-csv" onclick="document.getElementById(&#39;csv-file&#39;).click()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4a1 1 0 011-1h5l3 3v6a1 1 0 01-1 1H4a1 1 0 01-1-1z"></path><path d="M9 3v3h3"></path><line x1="6" y1="8" x2="10" y2="8"></line><line x1="6" y1="10.5" x2="10" y2="10.5"></line></svg>
-      楽天証券CSVを読み込む
+      楽天証券CSV
     </button>
     <input type="file" id="csv-file" class="csv-input" accept=".csv" onchange="handleCSV(this)">
-    <button class="btn btn-ai" id="bulk-ai-btn" onclick="aiFetchAll(&#39;portfolio&#39;)">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"></circle><path d="M8 5v3l2 2"></path></svg>
-      AIで全銘柄の配当情報を取得
-    </button>
-    <span id="bulk-status" style="font-size:12px;color:var(--text2);"></span>
   </div>
 
   <div class="table-wrap">
@@ -549,15 +544,15 @@ function renderPortfolio(){
     const yb=yldBuy(r),ym=yldMkt(r);
     const ann=calcAnnualJpy(r);
     const g=gainJpy(r);
-    const mktStr=r.mktPrice?fmtPrice(r,r.mktPrice):'<span class="price-loading">未取得</span>';
+    const mktStr=r.mktPrice?fmtPrice(r,r.mktPrice):'<span class="price-loading">—</span>';
     return`<tr data-id="${r.id}">
       <td style="text-align:left;"><input type="text" class="left" value="${r.code||''}" placeholder="コード" onchange="updRow('portfolio',${r.id},'code',this.value)" onfocus="this.select()"></td>
       <td style="text-align:left;">
         <div class="name-cell-wrap" id="name-wrap-${r.id}">
-          <button class="name-btn" id="name-btn-${r.id}" onclick="openModal('portfolio',${r.id})">${r.name||(r.code?'未取得':'—')}</button>
-          <button class="name-edit-btn" onclick="editName('portfolio',${r.id})" title="銘柄名を編集">
+          <button class="name-btn" id="name-btn-${r.id}" onclick="openModal('portfolio',${r.id})" ondblclick="event.stopPropagation();editName('portfolio',${r.id})" title="クリック:詳細 / ダブルクリック:名前編集">${r.name||'—'}</button>
+          ${r.name?'':`<button class="name-edit-btn" onclick="editName('portfolio',${r.id})" title="銘柄名を編集">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z"/></svg>
-          </button>
+          </button>`}
         </div>
       </td>
       <td class="hm" id="shares-cell-${r.id}" onclick="startEdit(this,${r.id},'shares')" style="cursor:text;">${r.shares?r.shares.toLocaleString('ja-JP'):'—'}</td>
@@ -578,8 +573,14 @@ function renderPortfolio(){
       </button></td>
     </tr>`;
   };
-  const jpRows=portfolio.filter(r=>r.market==='jp');
-  const usRows=portfolio.filter(r=>r.market==='us');
+  const byCode=(a,b)=>{
+    if(!a.code&&!b.code)return 0;
+    if(!a.code)return 1;
+    if(!b.code)return -1;
+    return a.code.localeCompare(b.code,'ja',{numeric:true});
+  };
+  const jpRows=portfolio.filter(r=>r.market==='jp').sort(byCode);
+  const usRows=portfolio.filter(r=>r.market==='us').sort(byCode);
   const colHdJp=`<tr style="background:var(--surface2);">
     <th style="width:76px;text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">コード</th>
     <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">銘柄名</th>
@@ -639,7 +640,7 @@ function renderWatch(){
     const adiv=annualDiv(r);
     const adivStr=fmtDiv(r,adiv);
     const ym=yldMkt(r);
-    const mktStr=r.mktPrice?fmtPrice(r,r.mktPrice):'<span class="price-loading">未取得</span>';
+    const mktStr=r.mktPrice?fmtPrice(r,r.mktPrice):'<span class="price-loading">—</span>';
     const annRef=adiv>0?(r.market==='us'?adiv*100*getFx():adiv*100):0;
     return`<tr data-id="${r.id}">
       <td style="text-align:left;">${badge}</td>
@@ -1091,18 +1092,17 @@ function parseCSV(text){
     if(!isJp&&!isUs)continue;
     if(existing.has(code)){skipped++;continue;}
     const market=isJp?'jp':'us';
-    let name='',shares=0,buyPrice=0;
-    for(let j=1;j<cols.length;j++){
-      const v=cols[j].replace(/,/g,'');
-      if(!name&&isNaN(parseFloat(v))&&v.length>1)name=v;
-      if(!shares&&/^\d+$/.test(v)&&parseFloat(v)>0&&parseFloat(v)<1000000)shares=parseFloat(v);
-      if(!buyPrice&&parseFloat(v)>100&&parseFloat(v)<10000000)buyPrice=parseFloat(v);
-    }
-    portfolio.push({id:nextId++,market,code,name:name||code,shares,buyPrice,mktPrice:0,periods:defPeriods(market),history:[]});
+    const name=cols[1]||code;
+    // 楽天証券CSV列構成: コード,銘柄名,保有数量,貸借中,内訳通常数量,内訳信用数量,平均取得価額,取得総額,現在値,前日比,時価評価額,評価損益
+    const num=v=>parseFloat((v||'').replace(/,/g,''))||0;
+    const shares=num(cols[2]);
+    const buyPrice=num(cols[6]);
+    const mktPrice=num(cols[8]);
+    portfolio.push({id:nextId++,market,code,name,shares,buyPrice,mktPrice,periods:defPeriods(market),history:[]});
     existing.add(code);added++;
   }
   save();render();
-  if(added>0)alert(`${added}銘柄を読み込みました。${skipped?skipped+'銘柄はスキップ。':''}「AIで全銘柄の配当情報を取得」で配当情報を一括取得できます。`);
+  if(added>0)alert(`${added}銘柄を読み込みました。${skipped?skipped+'銘柄はスキップ。':''}配当情報は各銘柄の詳細から入力してください。`);
   else alert('対応する銘柄が見つかりませんでした。');
 }
 
