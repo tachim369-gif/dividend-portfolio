@@ -95,6 +95,11 @@ td input.left{text-align:left;font-family:var(--sans);}
 td input:focus{outline:none;border-bottom-color:var(--border2);}
 .name-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--text);text-align:left;padding:4px 10px;transition:all .15s;text-decoration:none;}
 .name-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--accent2);}
+.name-cell-wrap{display:flex;align-items:center;gap:4px;}
+.name-edit-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:none;background:none;color:var(--text3);cursor:pointer;border-radius:6px;transition:all .15s;}
+.name-edit-btn:hover{background:var(--surface2);color:var(--text2);}
+.name-input{font-family:var(--sans);font-size:13px;padding:4px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);width:100%;}
+.name-input:focus{outline:none;border-color:var(--accent2);}
 .detail-btn{background:none;border:1px solid var(--border);cursor:pointer;color:var(--text3);font-size:11px;padding:2px 7px;border-radius:4px;transition:all .15s;white-space:nowrap;font-family:var(--sans);}
 .detail-btn:hover{background:var(--accent2-bg);color:var(--accent2);border-color:#b8d4f0;}
 .buy-btn{background:none;border:1px solid #b4dcc6;cursor:pointer;color:var(--accent);font-size:11px;padding:2px 8px;border-radius:4px;transition:all .15s;white-space:nowrap;font-family:var(--sans);font-weight:500;}
@@ -106,6 +111,8 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 .mono-cell{font-family:var(--mono);font-size:13px;color:var(--text2);}
 .bold-cell{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);}
 .del-btn{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:4px;transition:color .15s,background .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ir-link-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;color:var(--text3);text-decoration:none;transition:all .15s;}
+.ir-link-btn:hover{background:var(--surface2);color:var(--accent2);}
 .del-btn:hover{color:var(--danger);background:var(--danger-bg);}
 .empty-state{padding:40px 24px;text-align:center;color:var(--text3);font-size:13px;}
 .up{color:var(--accent);}.down{color:var(--danger);}
@@ -262,7 +269,7 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
   <div class="table-wrap">
     <table style="table-layout:fixed;">
       <colgroup>
-        <col style="width:76px;"><col><col style="width:84px;"><col style="width:96px;"><col style="width:96px;"><col style="width:92px;"><col style="width:96px;"><col style="width:76px;"><col style="width:76px;"><col style="width:100px;"><col style="width:36px;">
+        <col style="width:76px;"><col><col style="width:84px;"><col style="width:96px;"><col style="width:96px;"><col style="width:92px;"><col style="width:96px;"><col style="width:76px;"><col style="width:76px;"><col style="width:100px;"><col style="width:32px;"><col style="width:36px;">
       </colgroup>
       <tbody id="portfolio-body"></tbody>
     </table>
@@ -530,7 +537,7 @@ function endEdit(input,id,field){
 function renderPortfolio(){
   const tb=document.getElementById('portfolio-body');
   if(!portfolio.length){
-    tb.innerHTML='<tr><td colspan="11" class="empty-state">銘柄を追加するか、楽天証券CSVを読み込んでください</td></tr>';
+    tb.innerHTML='<tr><td colspan="12" class="empty-state">銘柄を追加するか、楽天証券CSVを読み込んでください</td></tr>';
     updateTotals();return;
   }
   const mkRow=r=>{
@@ -546,7 +553,12 @@ function renderPortfolio(){
     return`<tr data-id="${r.id}">
       <td style="text-align:left;"><input type="text" class="left" value="${r.code||''}" placeholder="コード" onchange="updRow('portfolio',${r.id},'code',this.value)" onfocus="this.select()"></td>
       <td style="text-align:left;">
-        <button class="name-btn" id="name-btn-${r.id}" onclick="openModal('portfolio',${r.id})">${r.name||(r.code?'未取得':'—')}</button>
+        <div class="name-cell-wrap" id="name-wrap-${r.id}">
+          <button class="name-btn" id="name-btn-${r.id}" onclick="openModal('portfolio',${r.id})">${r.name||(r.code?'未取得':'—')}</button>
+          <button class="name-edit-btn" onclick="editName('portfolio',${r.id})" title="銘柄名を編集">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z"/></svg>
+          </button>
+        </div>
       </td>
       <td class="hm" id="shares-cell-${r.id}" onclick="startEdit(this,${r.id},'shares')" style="cursor:text;">${r.shares?r.shares.toLocaleString('ja-JP'):'—'}</td>
       <td class="hm" id="buyprice-cell-${r.id}" onclick="startEdit(this,${r.id},'buyPrice')" style="cursor:text;">${r.buyPrice?fmtPrice(r,r.buyPrice):'—'}</td>
@@ -556,6 +568,11 @@ function renderPortfolio(){
       <td class="yld-buy" id="ybuy-${r.id}">${yb!==null?yb.toFixed(2)+'%':'—'}</td>
       <td class="yld-mkt hm" id="ymkt-${r.id}">${ym!==null?ym.toFixed(2)+'%':'—'}</td>
       <td class="bold-cell" id="ann-${r.id}">${ann>0?fmtJpy(ann):'—'}</td>
+      <td style="text-align:center;">
+        <a class="ir-link-btn" href="${r.market==='jp'?`https://irbank.net/${r.code}/dividend`:`https://finance.yahoo.com/quote/${r.code}/history/`}" target="_blank" rel="noopener" title="${r.market==='jp'?'IRバンクで確認':'Yahoo Financeで確認'}">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>
+        </a>
+      </td>
       <td style="text-align:center;"><button class="del-btn" onclick="delRow('portfolio',${r.id})">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2,4 14,4"/><path d="M5,4V2h6v2"/><path d="M6,7v5M10,7v5"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
       </button></td>
@@ -574,6 +591,7 @@ function renderPortfolio(){
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">購入利回り</th>
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢利回り</th>
     <th style="width:100px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当計(円)</th>
+    <th style="width:32px;border-bottom:1px solid var(--border);"></th>
     <th style="width:36px;border-bottom:1px solid var(--border);"></th>
   </tr>`;
   const colHdUs=`<tr style="background:var(--surface2);">
@@ -587,9 +605,10 @@ function renderPortfolio(){
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">購入利回り</th>
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢利回り</th>
     <th style="width:100px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当計(円)</th>
+    <th style="width:32px;border-bottom:1px solid var(--border);"></th>
     <th style="width:36px;border-bottom:1px solid var(--border);"></th>
   </tr>`;
-  const sectionHd=(label,color)=>`<tr><td colspan="11" style="padding:14px 8px 6px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:${color};border-bottom:2px solid ${color};background:transparent;">${label}</td></tr>`;
+  const sectionHd=(label,color)=>`<tr><td colspan="12" style="padding:14px 8px 6px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:${color};border-bottom:2px solid ${color};background:transparent;">${label}</td></tr>`;
   let html='';
   if(jpRows.length){
     html+=sectionHd('🇯🇵 日本株','var(--accent2)');
@@ -597,7 +616,7 @@ function renderPortfolio(){
     html+=jpRows.map(mkRow).join('');
   }
   if(usRows.length){
-    if(jpRows.length) html+=`<tr><td colspan="11" style="height:16px;background:transparent;border:none;"></td></tr>`;
+    if(jpRows.length) html+=`<tr><td colspan="12" style="height:16px;background:transparent;border:none;"></td></tr>`;
     html+=sectionHd('🇺🇸 米国株','var(--accent)');
     html+=colHdUs;
     html+=usRows.map(mkRow).join('');
@@ -660,6 +679,25 @@ function updRow(listName,id,field,val){
   if(['shares','buyPrice','mktPrice'].includes(field))r[field]=parseFloat(val)||0;
   else r[field]=val;
   refreshRowUI(listName,r);save();
+}
+
+/* ── 銘柄名インライン編集 ── */
+function editName(listName,id){
+  const wrap=document.getElementById(`name-wrap-${id}`);
+  if(!wrap)return;
+  const list=getList(listName);
+  const r=list.find(x=>x.id===id);if(!r)return;
+  const current=r.name||'';
+  wrap.innerHTML=`<input type="text" class="name-input" id="name-input-${id}" value="${current.replace(/"/g,'&quot;')}" placeholder="銘柄名">`;
+  const input=document.getElementById(`name-input-${id}`);
+  input.focus();input.select();
+  const commit=()=>{
+    r.name=input.value.trim();
+    save();
+    renderPortfolio();
+  };
+  input.addEventListener('blur',commit);
+  input.addEventListener('keydown',e=>{if(e.key==='Enter')input.blur();});
 }
 
 function refreshRowUI(listName,r){
@@ -851,10 +889,7 @@ function renderRefLinks(r){
       </a>`;
   }else{
     el.innerHTML=`
-      <a class="ref-link macro" href="https://www.macrotrends.net/stocks/charts/${r.code}/${(r.name||r.code).toLowerCase().replace(/\s+/g,'-')}/dividend-yield-history" target="_blank" rel="noopener">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>Macrotrendsで確認
-      </a>
-      <a class="ref-link" href="https://finance.yahoo.com/quote/${r.code}/history/" target="_blank" rel="noopener">
+      <a class="ref-link macro" href="https://finance.yahoo.com/quote/${r.code}/history/" target="_blank" rel="noopener">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>Yahoo Financeで確認
       </a>`;
   }
