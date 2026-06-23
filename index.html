@@ -851,7 +851,7 @@ function renderRefLinks(r){
       </a>`;
   }else{
     el.innerHTML=`
-      <a class="ref-link macro" href="https://www.macrotrends.net/stocks/charts/${r.code}/${(r.name||r.code).toLowerCase().replace(/\s+/g,'-')}/dividend-per-share" target="_blank" rel="noopener">
+      <a class="ref-link macro" href="https://www.macrotrends.net/stocks/charts/${r.code}/${(r.name||r.code).toLowerCase().replace(/\s+/g,'-')}/dividend-yield-history" target="_blank" rel="noopener">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>Macrotrendsで確認
       </a>
       <a class="ref-link" href="https://finance.yahoo.com/quote/${r.code}/history/" target="_blank" rel="noopener">
