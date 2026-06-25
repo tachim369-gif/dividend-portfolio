@@ -222,6 +222,10 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
       楽天証券CSV
     </button>
     <input type="file" id="csv-file" class="csv-input" accept=".csv" onchange="handleCSV(this)">
+    <button class="btn btn-danger" style="margin-left:auto;" onclick="resetAllData()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"></polyline><path d="M1,1 A7,7 0 1,1 0,8"></path></svg>
+      データリセット
+    </button>
   </div>
 
   <div class="table-wrap" id="card-jp">
@@ -784,21 +788,56 @@ function handleCSV(input){
   reader.onload=e=>parseCSV(e.target.result);
   reader.readAsText(file,'Shift_JIS');input.value='';
 }
+function parseCSVLine(line){
+  // ダブルクオートで囲まれた項目内のカンマ（桁区切りなど）を無視して正しく分割する
+  const result=[];
+  let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(inQ){
+      if(ch==='"'){
+        if(line[i+1]==='"'){cur+='"';i++;}
+        else inQ=false;
+      }else cur+=ch;
+    }else{
+      if(ch==='"')inQ=true;
+      else if(ch===','){result.push(cur);cur='';}
+      else cur+=ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
 function parseCSV(text){
   const lines=text.split(/\r?\n/).filter(l=>l.trim());
   const num=v=>parseFloat((v||'').replace(/,/g,''))||0;
+  // CSV内に「参考為替レート」が記載されていればそれを使う（米国株の円換算購入単価をドルに戻すため）
+  const fxMatch=text.match(/参考為替レート[^"]*"\s*,\s*"([\d.]+)"/);
+  const fx=(fxMatch?parseFloat(fxMatch[1]):0)||getFx();
   const csvRows=[]; // {code,market,name,shares,buyPrice,mktPrice}
   for(const line of lines){
-    const cols=line.split(',').map(c=>c.replace(/^"|"$/g,'').trim());
+    const cols=parseCSVLine(line).map(c=>c.trim());
     const code=cols[0]||'';
     const isJp=/^\d{4}$/.test(code),isUs=/^[A-Z]{1,5}$/.test(code);
     if(!isJp&&!isUs)continue;
     const market=isJp?'jp':'us';
     const name=cols[1]||code;
-    // 楽天証券CSV列構成: コード,銘柄名,保有数量,貸借中,内訳通常数量,内訳信用数量,平均取得価額,取得総額,現在値,前日比,時価評価額,評価損益
-    csvRows.push({code,market,name,shares:num(cols[2]),buyPrice:num(cols[6]),mktPrice:num(cols[8])});
+    let shares,buyPrice,mktPrice;
+    if(isJp){
+      // 日本株CSV列構成: コード,銘柄名,保有数量,執行中,内訳通常数量,内訳積立数量,平均取得価額(円),取得総額,現在値(円),前日比,時価評価額,評価損益
+      shares=num(cols[2]);buyPrice=num(cols[6]);mktPrice=num(cols[8]);
+    }else{
+      // 米国株CSV列構成: ティッカー,銘柄名,取引所,保有数量,執行中数量,内訳通常数量,内訳積立数量,表示通貨,平均取得価額(円),取得総額,現在値(USドル),前日比,時価評価額,評価損益
+      // ※平均取得価額は円換算で記載されているため、参考為替レートでドルに換算する
+      shares=num(cols[3]);
+      const buyPriceYen=num(cols[8]);
+      buyPrice=fx>0?Math.round((buyPriceYen/fx)*100)/100:0;
+      mktPrice=num(cols[10]);
+    }
+    csvRows.push({code,market,name,shares,buyPrice,mktPrice});
   }
   if(!csvRows.length){alert('対応する銘柄が見つかりませんでした。');return;}
+  if(fxMatch)document.getElementById('fx-rate').value=fx;
 
   const marketsInCsv=new Set(csvRows.map(r=>r.market));
   const existingByCode={};
@@ -821,6 +860,16 @@ function parseCSV(text){
   portfolio=[...kept,...newRows];
   save();render();
   alert(`CSVを反映しました（新規${added}銘柄・更新${updated}銘柄）。CSVに無い銘柄は削除されました。配当情報は各銘柄の詳細から入力してください。`);
+}
+
+function resetAllData(){
+  if(!confirm('保存されているすべてのデータ（保有銘柄・配当情報）を削除します。\nこの操作は元に戻せません。本当にリセットしますか？'))return;
+  if(!confirm('もう一度確認します。本当にすべて削除してよろしいですか？'))return;
+  localStorage.removeItem(SK);
+  portfolio=[];nextId=1;
+  document.getElementById('fx-rate').value=155;
+  save();render();
+  alert('データをリセットしました。楽天証券CSVを読み込んで復元してください。');
 }
 
 document.getElementById('fx-rate').addEventListener('input',()=>{render();save();});
