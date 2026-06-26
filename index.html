@@ -6,7 +6,6 @@
 <title>配当ポートフォリオ管理</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,&lt;svg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 32 32&#39;&gt;&lt;rect width=&#39;32&#39; height=&#39;32&#39; rx=&#39;6&#39; fill=&#39;%231a1917&#39;/&gt;&lt;rect x=&#39;4&#39; y=&#39;20&#39; width=&#39;5&#39; height=&#39;8&#39; rx=&#39;1&#39; fill=&#39;%231a6b3c&#39;/&gt;&lt;rect x=&#39;11&#39; y=&#39;14&#39; width=&#39;5&#39; height=&#39;14&#39; rx=&#39;1&#39; fill=&#39;%231a6b3c&#39;/&gt;&lt;rect x=&#39;18&#39; y=&#39;8&#39; width=&#39;5&#39; height=&#39;20&#39; rx=&#39;1&#39; fill=&#39;%234caf7d&#39;/&gt;&lt;rect x=&#39;25&#39; y=&#39;4&#39; width=&#39;5&#39; height=&#39;24&#39; rx=&#39;1&#39; fill=&#39;%234caf7d&#39;/&gt;&lt;line x1=&#39;3&#39; y1=&#39;28&#39; x2=&#39;29&#39; y2=&#39;28&#39; stroke=&#39;%23a09e98&#39; stroke-width=&#39;1.5&#39;/&gt;&lt;/svg&gt;">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
   --bg:#f5f4f0;--surface:#fff;--surface2:#f0eeea;--border:#dddbd5;--border2:#c8c5bd;
@@ -23,8 +22,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 /* Header */
 header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;}
-.h-title{font-size:15px;font-weight:700;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
-.h-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+.h-title{font-size:21px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--accent);}
+.h-icon{flex-shrink:0;}
 .h-right{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
 .fx-label{font-size:12px;color:var(--text2);}
 .fx-input{font-family:var(--mono);font-size:13px;width:88px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);color:var(--text);text-align:right;}
@@ -81,9 +80,9 @@ td:nth-child(-n+3){text-align:left;font-family:var(--sans);font-size:13px;}
 td input{font-family:var(--mono);font-size:13px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);width:100%;padding:2px 0;text-align:right;transition:border-color .15s;}
 td input.left{text-align:left;font-family:var(--sans);}
 td input:focus{outline:none;border-bottom-color:var(--border2);}
-.name-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--text);text-align:left;padding:4px 10px;transition:all .15s;text-decoration:none;}
+.name-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--text);text-align:left;padding:4px 10px;transition:all .15s;text-decoration:none;display:block;width:100%;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .name-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--accent2);}
-.name-cell-wrap{display:flex;align-items:center;gap:4px;}
+.name-cell-wrap{display:flex;align-items:center;gap:4px;min-width:0;}
 .name-edit-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:none;background:none;color:var(--text3);cursor:pointer;border-radius:6px;transition:all .15s;}
 .name-edit-btn:hover{background:var(--surface2);color:var(--text2);}
 .name-input{font-family:var(--sans);font-size:13px;padding:4px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);width:100%;}
@@ -108,12 +107,15 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 .csv-input{display:none;}
 
 /* Modal */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:flex-start;padding:20px;}
 .overlay.open{display:flex;}
-.modal{background:var(--surface);border-radius:var(--rl);border:1px solid var(--border);width:100%;max-width:840px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.18);}
+.modal{background:var(--surface);border-radius:var(--rl);border:1px solid var(--border);width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.18);}
 .modal-hd{padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;background:var(--surface);z-index:1;}
 .modal-title{font-size:17px;font-weight:700;letter-spacing:-.3px;color:var(--text);}
 .modal-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.settle-edit{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--text3);}
+.settle-edit select{font-family:var(--sans);font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);}
+.settle-edit select:focus{outline:none;border-color:var(--border2);}
 .modal-close{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:4px;line-height:1;}
 .modal-close:hover{color:var(--text);background:var(--surface2);}
 .modal-body{padding:20px 24px 28px;}
@@ -126,25 +128,18 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 .period-card-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 .period-label-input{flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
 .period-label-input:focus{outline:none;border-color:var(--border2);}
-.period-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.period-fields{display:grid;grid-template-columns:1fr;gap:8px;max-width:200px;}
 .pf label{font-size:11px;color:var(--text3);display:block;margin-bottom:3px;}
 .pf input{width:100%;font-family:var(--mono);font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
 .pf input:focus{outline:none;border-color:var(--border2);}
 .add-period-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px dashed var(--border2);border-radius:var(--r);background:none;color:var(--text3);font-size:13px;font-family:var(--sans);cursor:pointer;width:100%;justify-content:center;transition:all .15s;margin-top:8px;}
 .add-period-btn:hover{background:var(--surface2);color:var(--text2);}
-
-.chart-wrap{height:200px;position:relative;}
-.hist-table{width:100%;border-collapse:collapse;font-size:13px;}
-.hist-table th{font-size:11px;color:var(--text3);font-weight:500;text-align:right;padding:6px 10px;border-bottom:1px solid var(--border);background:var(--surface2);}
-.hist-table th:first-child{text-align:left;}
-.hist-table td{padding:7px 10px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--mono);font-size:13px;color:var(--text);}
-.hist-table td:first-child{text-align:left;font-family:var(--mono);color:var(--text2);font-size:13px;}
-.hist-table tr:last-child td{border-bottom:none;}
-.hist-table tr:hover td{background:var(--surface2);}
-.chg-up{color:var(--accent);font-size:11px;}.chg-down{color:var(--danger);font-size:11px;}.chg-flat{color:var(--text3);font-size:11px;}
-.add-hist-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);}
-.add-hist-row .pf{flex:1;min-width:80px;}
-.btn-sm{padding:5px 12px;font-size:12px;}
+.annual-total{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-top:12px;}
+.annual-total .annual-total-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.annual-total .annual-total-label{flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
+.annual-total .annual-total-spacer{width:21px;height:21px;flex-shrink:0;}
+.annual-total .annual-total-sub{font-size:11px;color:var(--text3);margin-bottom:4px;}
+.annual-total .annual-total-val{width:100%;max-width:200px;box-sizing:border-box;font-family:var(--mono);font-size:13px;font-weight:400;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
 
 .ref-links{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .ref-link{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);text-decoration:none;transition:all .15s;}
@@ -163,14 +158,13 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
   header{padding:0 12px;}
   .hm{display:none;}
   .overlay{padding:8px;}
-  .period-fields{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="h-title"><div class="h-dot"></div>配当ポートフォリオ</div>
+  <div class="h-title"><svg class="h-icon" width="22" height="22" viewBox="0 0 16 16"><rect x="0" y="0" width="16" height="16" rx="4" fill="#1a1a1a"></rect><rect x="2" y="10" width="1.8" height="3" rx="0.5" fill="#1f5c38"></rect><rect x="5.4" y="8" width="1.8" height="5" rx="0.5" fill="#2c8050"></rect><rect x="8.8" y="5.5" width="1.8" height="7.5" rx="0.5" fill="#3fae6c"></rect><rect x="12.2" y="3" width="1.8" height="10" rx="0.5" fill="#5fe28c"></rect></svg>配当ポートフォリオ</div>
   <div class="h-right">
     <span class="fx-label">USD/JPY</span>
     <input type="number" class="fx-input" id="fx-rate" value="155" min="100" max="300" step="0.1">
@@ -261,6 +255,24 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
     <div>
       <div class="modal-title" id="m-title">銘柄詳細</div>
       <div class="modal-sub" id="m-sub"></div>
+      <div class="settle-edit">
+        <label for="m-settlement">決算月</label>
+        <select id="m-settlement" onchange="updSettlement(this.value)">
+          <option value="">未設定</option>
+          <option value="1">1月</option>
+          <option value="2">2月</option>
+          <option value="3">3月</option>
+          <option value="4">4月</option>
+          <option value="5">5月</option>
+          <option value="6">6月</option>
+          <option value="7">7月</option>
+          <option value="8">8月</option>
+          <option value="9">9月</option>
+          <option value="10">10月</option>
+          <option value="11">11月</option>
+          <option value="12">12月</option>
+        </select>
+      </div>
     </div>
     <button class="modal-close" onclick="closeModal()">
       <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="14" y2="14"></line><line x1="14" y1="2" x2="2" y2="14"></line></svg>
@@ -278,25 +290,7 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"></line><line x1="2" y1="8" x2="14" y2="8"></line></svg>
         配当回を追加（特別配当など）
       </button>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><span class="sec-title">配当推移（年間・1株あたり）</span></div>
-      <div class="chart-wrap"><canvas id="hist-chart"></canvas></div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd"><span class="sec-title">配当履歴（過去10年）</span></div>
-      <div style="overflow-x:auto;">
-        <table class="hist-table">
-          <thead><tr><th>年度</th><th>年間配当</th><th>前年比</th><th>備考</th><th style="width:32px;"></th></tr></thead>
-          <tbody id="hist-body"></tbody>
-        </table>
-      </div>
-      <div class="add-hist-row">
-        <div class="pf"><label>年度</label><input type="text" id="ny" placeholder="2024" style="width:80px;"></div>
-        <div class="pf"><label>年間配当（1株）</label><input type="number" id="nd" placeholder="0" step="0.01"></div>
-        <div class="pf"><label>備考（任意）</label><input type="text" id="nn" placeholder="特別配当含む など"></div>
-        <button class="btn btn-sm" onclick="addHistRow()">+ 追加</button>
-      </div>
+      <div class="annual-total" id="m-annual-total"></div>
     </div>
   </div>
 </div>
@@ -305,7 +299,7 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 
 <script>
 const SK='divpf_v5';
-let portfolio=[],nextId=1,curId=null,curList=null,hChart=null;
+let portfolio=[],nextId=1,curId=null,curList=null;
 
 /* ── Storage ── */
 function save(){
@@ -357,6 +351,12 @@ function fmtDiv(r,v){
 }
 function fmtDate(d){return d?d.replace(/-/g,'/'):'—';}
 function annualDiv(r){return(r.periods||[]).reduce((s,p)=>s+(p.div||0),0);}
+function settleInfo(r){
+  const n=(r.periods||[]).length;
+  const m=r.settlementMonth?`${r.settlementMonth}月期`:'';
+  if(!m&&!n)return'';
+  return[m,n?`年${n}回`:''].filter(Boolean).join('・');
+}
 function calcAnnualJpy(r){const d=annualDiv(r);return r.market==='us'?(r.shares||0)*d*getFx():(r.shares||0)*d;}
 function yldBuy(r){const d=annualDiv(r);return(r.buyPrice&&d)?(d/r.buyPrice*100):null;}
 function yldMkt(r){const d=annualDiv(r);return(r.mktPrice&&d)?(d/r.mktPrice*100):null;}
@@ -440,7 +440,7 @@ function renderPortfolio(){
       <td class="yld-mkt hm" id="ymkt-${r.id}">${ym!==null?ym.toFixed(2)+'%':'—'}</td>
       <td class="bold-cell" id="ann-${r.id}">${ann>0?fmtJpy(ann):'—'}</td>
       <td style="text-align:center;">
-        <a class="ir-link-btn" href="${r.market==='jp'?`https://irbank.net/${r.code}/dividend`:`https://finance.yahoo.com/quote/${r.code}/history/`}" target="_blank" rel="noopener" title="${r.market==='jp'?'IRバンクで確認':'Yahoo Financeで確認'}">
+        <a class="ir-link-btn" href="${r.market==='jp'?`https://irbank.net/${r.code}`:`https://finance.yahoo.com/quote/${r.code}/`}" target="_blank" rel="noopener" title="銘柄ページを開く">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>
         </a>
       </td>
@@ -648,8 +648,18 @@ function openModal(listName,id){
   const r=list.find(x=>x.id===id);if(!r)return;
   document.getElementById('m-title').textContent=r.name||r.code||'銘柄詳細';
   document.getElementById('m-sub').textContent=(r.market==='jp'?'東証　':'NYSE/NASDAQ　')+(r.code||'');
-  renderRefLinks(r);renderPeriods(r);renderHistTable(r);renderHistChart(r);
+  document.getElementById('m-settlement').value=r.settlementMonth||'';
+  renderRefLinks(r);renderPeriods(r);
   document.getElementById('overlay').classList.add('open');
+}
+
+function updSettlement(val){
+  const list=getList(curList);
+  const r=list.find(x=>x.id===curId);if(!r)return;
+  r.settlementMonth=val?parseInt(val):null;
+  save();
+  const el=document.getElementById('settle-'+r.id);
+  if(el)el.textContent=settleInfo(r);
 }
 
 function renderRefLinks(r){
@@ -673,9 +683,11 @@ function renderRefLinks(r){
 function renderPeriods(r){
   const list=document.getElementById('m-periods');
   if(!(r.periods&&r.periods.length)){
-    list.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px 0;">配当回がありません。</div>';return;
+    list.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px 0;">配当回がありません。</div>';
+    renderAnnualTotal(r);return;
   }
   const cur=r.market==='us'?'$':'¥';
+  const unit=r.market==='us'?'$':'円';
   const step=r.market==='us'?'0.01':'1';
   list.innerHTML=r.periods.map(p=>`
     <div class="period-card">
@@ -687,14 +699,19 @@ function renderPeriods(r){
         </button>
       </div>
       <div class="period-fields">
-        <div class="pf"><label>配当額（1株）</label>
+        <div class="pf"><label>配当額（${unit}/1株）</label>
           <input type="number" value="${p.div||''}" placeholder="${cur}0" step="${step}" min="0" oninput="updPeriod('${p.id}','div',this.value)"></div>
-        <div class="pf"><label>権利確定日</label>
-          <input type="date" value="${p.exDate||''}" onchange="updPeriod('${p.id}','exDate',this.value)"></div>
-        <div class="pf"><label>配当支払日</label>
-          <input type="date" value="${p.payDate||''}" onchange="updPeriod('${p.id}','payDate',this.value)"></div>
       </div>
     </div>`).join('');
+  renderAnnualTotal(r);
+}
+
+function renderAnnualTotal(r){
+  const el=document.getElementById('m-annual-total');if(!el)return;
+  const unit=r.market==='us'?'$':'円';
+  const total=annualDiv(r);
+  const totalStr=r.market==='us'?total.toFixed(2):Math.round(total).toLocaleString('ja-JP');
+  el.innerHTML=`<div class="annual-total-hd"><div class="annual-total-label">年間配当合計</div><div class="annual-total-spacer"></div></div><div class="annual-total-sub">配当額（${unit}/1株）</div><div class="annual-total-val">${totalStr}</div>`;
 }
 
 function updPeriod(pid,field,val){
@@ -702,7 +719,7 @@ function updPeriod(pid,field,val){
   const r=list.find(x=>x.id===curId);if(!r)return;
   const p=r.periods.find(x=>x.id===pid);if(!p)return;
   if(field==='div')p.div=parseFloat(val)||0;else p[field]=val;
-  refreshRowUI(curList,r);save();
+  refreshRowUI(curList,r);renderAnnualTotal(r);save();
 }
 
 function addPeriod(){
@@ -719,63 +736,8 @@ function delPeriod(pid){
   save();renderPeriods(r);refreshRowUI(curList,r);
 }
 
-function renderHistTable(r){
-  const hist=(r.history||[]).slice().sort((a,b)=>b.year-a.year);
-  const tb=document.getElementById('hist-body');
-  if(!hist.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px;font-family:var(--mono);">履歴データなし</td></tr>';return;}
-  tb.innerHTML=hist.map((h,i)=>{
-    const prev=hist[i+1];let chg='—';
-    if(prev&&prev.div){
-      const diff=h.div-prev.div,pct=((diff/prev.div)*100).toFixed(1);
-      if(diff>0.001)chg=`<span class="chg-up">▲${Math.abs(pct)}%</span>`;
-      else if(diff<-0.001)chg=`<span class="chg-down">▼${Math.abs(pct)}%</span>`;
-      else chg=`<span class="chg-flat">±0%</span>`;
-    }
-    const ds=r.market==='us'?'$'+h.div.toFixed(2):'¥'+h.div.toLocaleString('ja-JP');
-    return`<tr><td>${h.year}年</td><td>${ds}</td><td>${chg}</td>
-      <td style="font-family:var(--mono);color:var(--text2);font-size:13px;">${h.note||'—'}</td>
-      <td><button class="del-btn" onclick="delHist(${h.year})">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/></svg>
-      </button></td></tr>`;
-  }).join('');
-}
-
-function renderHistChart(r){
-  const hist=(r.history||[]).slice().sort((a,b)=>a.year-b.year);
-  if(hChart){hChart.destroy();hChart=null;}
-  if(!hist.length)return;
-  const ctx=document.getElementById('hist-chart').getContext('2d');
-  const col=r.market==='us'?'#1a6b3c':'#1a4a8a';
-  const colBg=r.market==='us'?'rgba(26,107,60,.08)':'rgba(26,74,138,.08)';
-  hChart=new Chart(ctx,{type:'line',
-    data:{labels:hist.map(h=>h.year+''),datasets:[{data:hist.map(h=>h.div),borderColor:col,backgroundColor:colBg,borderWidth:2,pointRadius:4,pointBackgroundColor:col,fill:true,tension:0.3}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>r.market==='us'?'$'+c.parsed.y.toFixed(2):'¥'+c.parsed.y.toLocaleString('ja-JP')}}},
-      scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11},color:'#a09e98'}},
-        y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11,family:'Roboto Mono'},color:'#a09e98',callback:v=>r.market==='us'?'$'+v.toFixed(2):'¥'+v.toLocaleString('ja-JP')}}}}});
-}
-
-function addHistRow(){
-  const list=getList(curList);const r=list.find(x=>x.id===curId);if(!r)return;
-  const year=parseInt(document.getElementById('ny').value);
-  const div=parseFloat(document.getElementById('nd').value);
-  const note=document.getElementById('nn').value.trim();
-  if(!year||isNaN(div)){alert('年度と配当額を入力してください');return;}
-  if(!r.history)r.history=[];
-  r.history=r.history.filter(h=>h.year!==year);
-  r.history.push({year,div,note});r.history.sort((a,b)=>a.year-b.year);
-  ['ny','nd','nn'].forEach(id=>document.getElementById(id).value='');
-  save();renderHistTable(r);renderHistChart(r);
-}
-
-function delHist(year){
-  const list=getList(curList);const r=list.find(x=>x.id===curId);if(!r)return;
-  r.history=(r.history||[]).filter(h=>h.year!==year);
-  save();renderHistTable(r);renderHistChart(r);
-}
-
 function closeModal(){
   document.getElementById('overlay').classList.remove('open');
-  if(hChart){hChart.destroy();hChart=null;}
   curId=null;curList=null;
 }
 function closeOut(e){if(e.target===document.getElementById('overlay'))closeModal();}
