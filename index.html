@@ -13,6 +13,7 @@
   --accent:#1a6b3c;--accent-bg:#e8f4ed;
   --accent2:#1a4a8a;--accent2-bg:#e6eef8;
   --danger:#a63020;--danger-bg:#faeae7;
+  --gain-up:#7a1f10;--gain-down:#0d4326;
   --warn:#7a5c1a;--warn-bg:#fef6e4;
   --mono:'Noto Sans JP',sans-serif;--sans:'Noto Sans JP',sans-serif;
   --r:8px;--rl:12px;
@@ -95,7 +96,8 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 .ir-link-btn:hover{background:var(--surface2);color:var(--accent2);}
 .del-btn:hover{color:var(--danger);background:var(--danger-bg);}
 .empty-state{padding:40px 24px;text-align:center;color:var(--text3);font-size:13px;}
-.up{color:var(--accent);}.down{color:var(--danger);}
+.up{color:var(--gain-up);}.down{color:var(--gain-down);}
+.minus-emph{font-size:1em;font-weight:inherit;margin-right:0;}
 .price-loading{color:var(--text3);font-size:11px;font-style:italic;}
 .badge-cell{display:flex;align-items:center;}
 
@@ -107,42 +109,44 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 .csv-input{display:none;}
 
 /* Modal */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:flex-start;padding:20px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:stretch;justify-content:flex-start;padding:0;}
 .overlay.open{display:flex;}
-.modal{background:var(--surface);border-radius:var(--rl);border:1px solid var(--border);width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.18);}
-.modal-hd{padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;background:var(--surface);z-index:1;}
-.modal-title{font-size:17px;font-weight:700;letter-spacing:-.3px;color:var(--text);}
-.modal-sub{font-size:12px;color:var(--text2);margin-top:3px;}
-.settle-edit{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--text3);}
+.modal{background:var(--surface);border-radius:0;border:none;border-right:1px solid var(--border);width:100%;max-width:460px;height:100vh;max-height:100vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.18);}
+.modal-hd{padding:12px 18px 10px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;background:var(--surface);z-index:1;}
+.modal-title{font-size:16px;font-weight:700;letter-spacing:-.3px;color:var(--text);}
+.modal-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.settle-edit{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--text3);}
 .settle-edit select{font-family:var(--sans);font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);}
 .settle-edit select:focus{outline:none;border-color:var(--border2);}
 .modal-close{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:4px;line-height:1;}
 .modal-close:hover{color:var(--text);background:var(--surface2);}
-.modal-body{padding:20px 24px 28px;}
-.sec{margin-bottom:28px;}
-.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.modal-body{padding:14px 18px 18px;}
+.sec{margin-bottom:16px;}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
 .sec-title{font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;}
 
-.periods-list{display:flex;flex-direction:column;gap:8px;}
-.period-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;}
-.period-card-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-.period-label-input{flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
+.periods-list{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;}
+.period-card{min-width:0;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;}
+.period-card-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.period-label-input{flex:1;min-width:0;box-sizing:border-box;font-family:var(--sans);font-size:13px;font-weight:500;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
 .period-label-input:focus{outline:none;border-color:var(--border2);}
-.period-fields{display:grid;grid-template-columns:1fr;gap:8px;max-width:200px;}
-.pf label{font-size:11px;color:var(--text3);display:block;margin-bottom:3px;}
-.pf input{width:100%;font-family:var(--mono);font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
+.period-fields{display:grid;grid-template-columns:1fr;gap:8px;min-width:0;}
+.pf label{font-size:11px;color:var(--text3);display:block;margin-bottom:2px;}
+.pf input{width:100%;min-width:0;box-sizing:border-box;font-family:var(--mono);font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
 .pf input:focus{outline:none;border-color:var(--border2);}
-.add-period-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px dashed var(--border2);border-radius:var(--r);background:none;color:var(--text3);font-size:13px;font-family:var(--sans);cursor:pointer;width:100%;justify-content:center;transition:all .15s;margin-top:8px;}
+input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type="number"]{-moz-appearance:textfield;}
+.add-period-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--border2);border-radius:var(--r);background:none;color:var(--text3);font-size:13px;font-family:var(--sans);cursor:pointer;width:100%;justify-content:center;transition:all .15s;margin-top:6px;}
 .add-period-btn:hover{background:var(--surface2);color:var(--text2);}
-.annual-total{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-top:12px;}
-.annual-total .annual-total-hd{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.annual-total{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;margin-top:10px;}
+.annual-total .annual-total-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
 .annual-total .annual-total-label{flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
 .annual-total .annual-total-spacer{width:21px;height:21px;flex-shrink:0;}
-.annual-total .annual-total-sub{font-size:11px;color:var(--text3);margin-bottom:4px;}
+.annual-total .annual-total-sub{font-size:11px;color:var(--text3);margin-bottom:3px;}
 .annual-total .annual-total-val{width:100%;max-width:200px;box-sizing:border-box;font-family:var(--mono);font-size:13px;font-weight:400;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
 
-.ref-links{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-.ref-link{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);text-decoration:none;transition:all .15s;}
+.ref-links{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.ref-link{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);text-decoration:none;transition:all .15s;}
 .ref-link:hover{background:var(--surface);border-color:var(--border2);color:var(--text);}
 .ref-link.irbank{border-color:#b8d4f0;color:var(--accent2);background:var(--accent2-bg);}
 .ref-link.irbank:hover{background:#d0e4f8;}
@@ -157,7 +161,6 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
   .sum-val{font-size:14px;}
   header{padding:0 12px;}
   .hm{display:none;}
-  .overlay{padding:8px;}
 }
 </style>
 </head>
@@ -222,7 +225,7 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
     </button>
   </div>
 
-  <div class="table-wrap" id="card-jp">
+  <div class="table-wrap" id="card-jp" style="margin-bottom:24px;">
     <div class="section-card-hd jp">🇯🇵 日本株</div>
     <table style="table-layout:fixed;">
       <colgroup>
@@ -280,12 +283,8 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
   </div>
   <div class="modal-body">
     <div class="sec">
-      <div class="sec-hd">
-        <span class="sec-title">配当スケジュール</span>
-        <span style="font-size:11px;color:var(--text3);">回数・ラベルは自由に変更できます</span>
-      </div>
-      <div class="ref-links" id="m-ref-links" style="margin-top:10px;"></div>
-      <div class="periods-list" id="m-periods" style="margin-top:4px;"></div>
+      <div class="ref-links" id="m-ref-links" style="margin-top:0;"></div>
+      <div class="periods-list" id="m-periods" style="margin-top:2px;"></div>
       <button class="add-period-btn" onclick="addPeriod()">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"></line><line x1="2" y1="8" x2="14" y2="8"></line></svg>
         配当回を追加（特別配当など）
@@ -299,12 +298,31 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 
 <script>
 const SK='divpf_v5';
-let portfolio=[],nextId=1,curId=null,curList=null;
+const DK='divpf_v5_div';
+let portfolio=[],nextId=1,curId=null,curList=null,divData={};
 
 /* ── Storage ── */
 function save(){
   const fxRate=document.getElementById('fx-rate').value;
   localStorage.setItem(SK,JSON.stringify({portfolio,nextId,fxRate}));
+}
+function saveDiv(){
+  try{localStorage.setItem(DK,JSON.stringify(divData));}catch(e){}
+}
+function loadDiv(){
+  try{divData=JSON.parse(localStorage.getItem(DK))||{};}catch(e){divData={};}
+}
+function syncDiv(r){
+  if(!r.code)return;
+  divData[r.code]={periods:r.periods,settlementMonth:r.settlementMonth||null};
+  saveDiv();
+}
+function applyDiv(r){
+  const d=divData[r.code];
+  if(d){
+    r.periods=JSON.parse(JSON.stringify(d.periods||defPeriods(r.market)));
+    if(d.settlementMonth)r.settlementMonth=d.settlementMonth;
+  }
 }
 function load(){
   try{
@@ -341,6 +359,10 @@ function uid(){return Math.random().toString(36).slice(2,8);}
 function getFx(){return parseFloat(document.getElementById('fx-rate').value)||155;}
 function fmtNum(v){return Math.round(v).toLocaleString('ja-JP');}
 function fmtJpy(v){return Math.round(v).toLocaleString('ja-JP');}
+function fmtGainHtml(v){
+  if(v===null||v===undefined)return'—';
+  return fmtJpy(Math.abs(v));
+}
 function fmtPrice(r,v){
   if(r.market==='us') return parseFloat(v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
   return Math.round(v||0).toLocaleString('ja-JP');
@@ -384,7 +406,7 @@ function updateTotals(){
   const gainEl=document.getElementById('total-gain');
   const gainSub=document.getElementById('total-gain-sub');
   if(gainN>0){
-    gainEl.textContent=fmtJpy(gain);
+    gainEl.innerHTML=fmtGainHtml(gain);
     gainEl.className='sum-val '+(gain>=0?'up':'down');
     gainSub.textContent=gain>=0?'含み益（円）':'含み損（円）';
   }else{gainEl.textContent='—';gainEl.className='sum-val';}
@@ -425,7 +447,7 @@ function renderPortfolio(){
       <td style="text-align:left;"><input type="text" class="left" value="${r.code||''}" placeholder="コード" onchange="updRow('portfolio',${r.id},'code',this.value)" onfocus="this.select()"></td>
       <td style="text-align:left;">
         <div class="name-cell-wrap" id="name-wrap-${r.id}">
-          <button class="name-btn" id="name-btn-${r.id}" onclick="openModal('portfolio',${r.id})" ondblclick="event.stopPropagation();editName('portfolio',${r.id})" title="クリック:詳細 / ダブルクリック:名前編集">${r.name||'—'}</button>
+          <button class="name-btn" id="name-btn-${r.id}" onclick="handleNameClick(${r.id})" ondblclick="event.stopPropagation();handleNameDblClick('portfolio',${r.id})" title="クリック:詳細 / ダブルクリック:名前編集">${r.name||'—'}</button>
           ${r.name?'':`<button class="name-edit-btn" onclick="editName('portfolio',${r.id})" title="銘柄名を編集">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z"/></svg>
           </button>`}
@@ -434,7 +456,7 @@ function renderPortfolio(){
       <td class="hm" id="shares-cell-${r.id}" onclick="startEdit(this,${r.id},'shares')" style="cursor:text;">${r.shares?r.shares.toLocaleString('ja-JP'):'—'}</td>
       <td class="hm" id="buyprice-cell-${r.id}" onclick="startEdit(this,${r.id},'buyPrice')" style="cursor:text;">${r.buyPrice?fmtPrice(r,r.buyPrice):'—'}</td>
       <td class="hm" id="mkt-${r.id}">${mktStr}</td>
-      <td class="hm" id="gain-${r.id}" style="font-family:var(--mono);font-size:13px;color:${g!==null?(g>=0?'var(--accent)':'var(--danger)'):'var(--text3)'};">${g!==null?fmtJpy(g):'—'}</td>
+      <td class="hm" id="gain-${r.id}" style="font-family:var(--mono);font-size:13px;color:${g!==null?(g>=0?'var(--gain-up)':'var(--gain-down)'):'var(--text3)'};">${fmtGainHtml(g)}</td>
       <td><span class="mono-cell" id="adiv-${r.id}">${adiv>0?adivStr:'—'}</span></td>
       <td class="yld-buy" id="ybuy-${r.id}">${yb!==null?yb.toFixed(2)+'%':'—'}</td>
       <td class="yld-mkt hm" id="ymkt-${r.id}">${ym!==null?ym.toFixed(2)+'%':'—'}</td>
@@ -485,23 +507,24 @@ function renderPortfolio(){
     <th style="width:32px;border-bottom:1px solid var(--border);"></th>
     <th style="width:36px;border-bottom:1px solid var(--border);"></th>
   </tr>`;
-  const totalRow=(rows)=>{
+  const totalRow=(rows,market)=>{
     const gainSum=rows.reduce((s,r)=>{const g=gainJpy(r);return g!==null?s+g:s;},0);
     const annSum=rows.reduce((s,r)=>s+calcAnnualJpy(r),0);
-    return`<tr style="background:var(--surface2);font-weight:600;">
+    const bg=market==='jp'?'var(--accent2-bg)':'var(--accent-bg)';
+    return`<tr style="background:${bg};font-weight:600;">
       <td style="text-align:left;padding:8px 8px;font-size:12px;color:var(--text2);">合計</td>
       <td></td><td></td><td></td><td></td>
-      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:${gainSum>=0?'var(--accent)':'var(--danger)'};">${fmtJpy(gainSum)}</td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:${gainSum>=0?'var(--gain-up)':'var(--gain-down)'};">${fmtGainHtml(gainSum)}</td>
       <td></td><td></td><td></td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text);">${fmtJpy(annSum)}</td>
       <td></td><td></td>
     </tr>`;
   };
   tbJp.innerHTML=jpRows.length
-    ?colHdJp+jpRows.map(mkRow).join('')+totalRow(jpRows)
+    ?colHdJp+jpRows.map(mkRow).join('')+totalRow(jpRows,'jp')
     :'<tr><td colspan="12" class="empty-state">日本株を追加するか、楽天証券CSVを読み込んでください</td></tr>';
   tbUs.innerHTML=usRows.length
-    ?colHdUs+usRows.map(mkRow).join('')+totalRow(usRows)
+    ?colHdUs+usRows.map(mkRow).join('')+totalRow(usRows,'us')
     :'<tr><td colspan="12" class="empty-state">米国株を追加するか、楽天証券CSVを読み込んでください</td></tr>';
   updateTotals();
 }
@@ -521,10 +544,20 @@ function updRow(listName,id,field,val){
   }
   if(['shares','buyPrice','mktPrice'].includes(field))r[field]=parseFloat(val)||0;
   else r[field]=val;
+  if(field==='code'&&divData[val.trim()]){applyDiv(r);renderPortfolio();}
   refreshRowUI(listName,r);save();
 }
 
 /* ── 銘柄名インライン編集 ── */
+let nameClickTimer=null;
+function handleNameClick(id){
+  if(nameClickTimer)clearTimeout(nameClickTimer);
+  nameClickTimer=setTimeout(()=>{openModal('portfolio',id);nameClickTimer=null;},280);
+}
+function handleNameDblClick(listName,id){
+  if(nameClickTimer){clearTimeout(nameClickTimer);nameClickTimer=null;}
+  editName(listName,id);
+}
 function editName(listName,id){
   const wrap=document.getElementById(`name-wrap-${id}`);
   if(!wrap)return;
@@ -556,8 +589,8 @@ function refreshRowUI(listName,r){
     set('ann-'+r.id,ann>0?fmtJpy(ann):'—');
     const ge=document.getElementById('gain-'+r.id);
     if(ge){
-      ge.textContent=g!==null?fmtJpy(g):'—';
-      ge.style.color=g!==null?(g>=0?'var(--accent)':'var(--danger)'):'var(--text3)';
+      ge.innerHTML=fmtGainHtml(g);
+      ge.style.color=g!==null?(g>=0?'var(--gain-up)':'var(--gain-down)'):'var(--text3)';
     }
     if(r.mktPrice)setHtml('mkt-'+r.id,fmtPrice(r,r.mktPrice));
     const sc=document.getElementById('shares-cell-'+r.id);
@@ -657,24 +690,29 @@ function updSettlement(val){
   const list=getList(curList);
   const r=list.find(x=>x.id===curId);if(!r)return;
   r.settlementMonth=val?parseInt(val):null;
-  save();
+  save();syncDiv(r);
   const el=document.getElementById('settle-'+r.id);
   if(el)el.textContent=settleInfo(r);
 }
 
+let refWin=null;
+function openRefWin(e,url){
+  if(e)e.preventDefault();
+  const left=480;
+  const w=Math.max(420,(window.screen.availWidth||1200)-left-20);
+  const h=window.screen.availHeight||900;
+  refWin=window.open(url,'refwin',`left=${left},top=20,width=${w},height=${h-40}`);
+}
 function renderRefLinks(r){
   const el=document.getElementById('m-ref-links');if(!r.code){el.innerHTML='';return;}
   if(r.market==='jp'){
     el.innerHTML=`
-      <a class="ref-link irbank" href="https://irbank.net/${encodeURIComponent(r.code)}/dividend" target="_blank" rel="noopener">
+      <a class="ref-link irbank" href="https://irbank.net/${encodeURIComponent(r.code)}/dividend" target="_blank" rel="noopener" onclick="openRefWin(event,this.href)">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>IRバンクで確認
-      </a>
-      <a class="ref-link" href="https://www.nikkei.com/nkd/company/dividend/?scode=${r.code}" target="_blank" rel="noopener">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>日経で確認
       </a>`;
   }else{
     el.innerHTML=`
-      <a class="ref-link macro" href="https://finance.yahoo.com/quote/${r.code}/history/" target="_blank" rel="noopener">
+      <a class="ref-link macro" href="https://finance.yahoo.com/quote/${r.code}/history/" target="_blank" rel="noopener" onclick="openRefWin(event,this.href)">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>Yahoo Financeで確認
       </a>`;
   }
@@ -686,21 +724,20 @@ function renderPeriods(r){
     list.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px 0;">配当回がありません。</div>';
     renderAnnualTotal(r);return;
   }
-  const cur=r.market==='us'?'$':'¥';
   const unit=r.market==='us'?'$':'円';
   const step=r.market==='us'?'0.01':'1';
   list.innerHTML=r.periods.map(p=>`
     <div class="period-card">
       <div class="period-card-hd">
-        <input class="period-label-input" type="text" value="${p.label||''}" placeholder="中間配当・Q1・特別配当など"
+        <input class="period-label-input" type="text" value="${p.label||''}" placeholder="中間配当・Q1・特別配当など" tabindex="-1"
           onchange="updPeriod('${p.id}','label',this.value)">
-        <button class="del-btn" onclick="delPeriod('${p.id}')">
+        <button class="del-btn" onclick="delPeriod('${p.id}')" tabindex="-1">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/></svg>
         </button>
       </div>
       <div class="period-fields">
         <div class="pf"><label>配当額（${unit}/1株）</label>
-          <input type="number" value="${p.div||''}" placeholder="${cur}0" step="${step}" min="0" oninput="updPeriod('${p.id}','div',this.value)"></div>
+          <input class="period-div-input" id="pdiv-${p.id}" type="number" value="${p.div||''}" step="${step}" min="0" oninput="updPeriod('${p.id}','div',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();closeModal();}"></div>
       </div>
     </div>`).join('');
   renderAnnualTotal(r);
@@ -717,28 +754,40 @@ function renderAnnualTotal(r){
 function updPeriod(pid,field,val){
   const list=getList(curList);
   const r=list.find(x=>x.id===curId);if(!r)return;
-  const p=r.periods.find(x=>x.id===pid);if(!p)return;
-  if(field==='div')p.div=parseFloat(val)||0;else p[field]=val;
-  refreshRowUI(curList,r);renderAnnualTotal(r);save();
+  const idx=r.periods.findIndex(x=>x.id===pid);if(idx===-1)return;
+  const p=r.periods[idx];
+  if(field==='div'){
+    p.div=parseFloat(val)||0;
+    if(r.market==='us'&&r.periods.length>=3){
+      for(let i=idx+1;i<r.periods.length;i++){
+        r.periods[i].div=p.div;
+        const inp=document.getElementById('pdiv-'+r.periods[i].id);
+        if(inp)inp.value=p.div||'';
+      }
+    }
+  }else p[field]=val;
+  refreshRowUI(curList,r);renderAnnualTotal(r);save();syncDiv(r);
 }
 
 function addPeriod(){
   const list=getList(curList);
   const r=list.find(x=>x.id===curId);if(!r)return;
   r.periods.push({id:uid(),label:'特別配当',div:0,exDate:'',payDate:''});
-  save();renderPeriods(r);refreshRowUI(curList,r);
+  save();syncDiv(r);renderPeriods(r);refreshRowUI(curList,r);
 }
 
 function delPeriod(pid){
   const list=getList(curList);
   const r=list.find(x=>x.id===curId);if(!r)return;
   r.periods=r.periods.filter(p=>p.id!==pid);
-  save();renderPeriods(r);refreshRowUI(curList,r);
+  save();syncDiv(r);renderPeriods(r);refreshRowUI(curList,r);
 }
 
 function closeModal(){
   document.getElementById('overlay').classList.remove('open');
   curId=null;curList=null;
+  if(refWin&&!refWin.closed){refWin.close();}
+  refWin=null;
 }
 function closeOut(e){if(e.target===document.getElementById('overlay'))closeModal();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();}});
@@ -808,7 +857,7 @@ function parseCSV(text){
   // CSVに無いが、CSVに出てきた市場区分に属する既存銘柄は削除（保有していないとみなす）
   const kept=portfolio.filter(r=>!marketsInCsv.has(r.market));
 
-  let added=0,updated=0;
+  let added=0,updated=0,restored=0;
   const newRows=csvRows.map(c=>{
     const old=existingByCode[c.code];
     if(old&&marketsInCsv.has(old.market)){
@@ -816,26 +865,28 @@ function parseCSV(text){
       return {...old,name:c.name,shares:c.shares,buyPrice:c.buyPrice,mktPrice:c.mktPrice};
     }
     added++;
-    return {id:nextId++,market:c.market,code:c.code,name:c.name,shares:c.shares,buyPrice:c.buyPrice,mktPrice:c.mktPrice,periods:defPeriods(c.market),history:[]};
+    const r={id:nextId++,market:c.market,code:c.code,name:c.name,shares:c.shares,buyPrice:c.buyPrice,mktPrice:c.mktPrice,periods:defPeriods(c.market)};
+    if(divData[c.code]){applyDiv(r);restored++;}
+    return r;
   });
 
   portfolio=[...kept,...newRows];
   save();render();
-  alert(`CSVを反映しました（新規${added}銘柄・更新${updated}銘柄）。CSVに無い銘柄は削除されました。配当情報は各銘柄の詳細から入力してください。`);
+  alert(`CSVを反映しました（新規${added}銘柄・更新${updated}銘柄）。CSVに無い銘柄は削除されました。${restored?`過去に入力した配当データを${restored}銘柄分復元しました。`:''}配当情報は各銘柄の詳細から入力してください。`);
 }
 
 function resetAllData(){
-  if(!confirm('保存されているすべてのデータ（保有銘柄・配当情報）を削除します。\nこの操作は元に戻せません。本当にリセットしますか？'))return;
+  if(!confirm('保有銘柄（株数・購入単価・実勢単価）をすべて削除します。\n配当データ（決算月・配当額）は銘柄コードごとに保持され、削除されません。\nこの操作は元に戻せません。本当にリセットしますか？'))return;
   if(!confirm('もう一度確認します。本当にすべて削除してよろしいですか？'))return;
   localStorage.removeItem(SK);
   portfolio=[];nextId=1;
   document.getElementById('fx-rate').value=155;
   save();render();
-  alert('データをリセットしました。楽天証券CSVを読み込んで復元してください。');
+  alert('保有データをリセットしました。楽天証券CSVを読み込んで復元してください（配当データは銘柄コードが一致すれば自動的に復元されます）。');
 }
 
 document.getElementById('fx-rate').addEventListener('input',()=>{render();save();});
-load();render();
+loadDiv();load();render();
 </script>
 
 </body>
