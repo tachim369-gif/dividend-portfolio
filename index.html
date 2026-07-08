@@ -40,14 +40,15 @@ main{max-width:1100px;margin:0 auto;padding:24px 24px 80px;}
 .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
 .sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;}
 .sum-card.primary{background:var(--text);border-color:var(--text);}
-.sum-lbl{font-size:11px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;}
+.sum-lbl{font-size:15px;color:var(--text);letter-spacing:.3px;margin-bottom:5px;font-weight:500;}
 .sum-card.primary .sum-lbl{color:rgba(255,255,255,.5);}
-.sum-val{font-family:var(--mono);font-size:20px;font-weight:500;letter-spacing:-.5px;color:var(--text);}
+.sum-val{font-family:var(--mono);font-size:22px;font-weight:500;letter-spacing:-.5px;color:var(--text);}
 .sum-card.primary .sum-val{color:#fff;}
 .sum-val-row{display:flex;gap:20px;align-items:flex-start;}
 .sum-val-col{flex:1;min-width:0;}
 .sum-val-col .sum-sub{margin-top:4px;}
 .sum-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.sum-sub-tax{font-size:15px;color:var(--text);margin-top:4px;font-family:var(--mono);}
 .sum-card.primary .sum-sub{color:rgba(255,255,255,.4);}
 
 /* Toolbar */
@@ -157,7 +158,7 @@ input[type="number"]{-moz-appearance:textfield;}
   main{padding:16px 12px 80px;}
   .sum-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
   .sum-card{padding:10px 8px;}
-  .sum-lbl{font-size:9px;}
+  .sum-lbl{font-size:11px;}
   .sum-val{font-size:14px;}
   header{padding:0 12px;}
   .hm{display:none;}
@@ -188,22 +189,21 @@ input[type="number"]{-moz-appearance:textfield;}
     <div class="sum-card" style="background:#fbe9ee;border-color:#f2c2d2;">
       <div class="sum-lbl">年間配当収入（円）</div>
       <div class="sum-val" id="total-annual-after">—</div>
-      <span id="total-annual" style="display:none;">18,282</span>
+      <div class="sum-sub-tax"><span id="total-annual">—</span>（税引前）</div>
     </div>
     <div class="sum-card" style="background:var(--accent2-bg);border-color:#b8d4f0;">
       <div class="sum-lbl">日本株（円）</div>
-      <div class="sum-val" id="jp-annual-after">15,100</div>
-      <span id="jp-annual" style="display:none;">15,100</span>
+      <div class="sum-val" id="jp-annual-after">—</div>
+      <div class="sum-sub-tax"><span id="jp-annual">—</span>（税引前）</div>
     </div>
     <div class="sum-card" style="background:var(--accent-bg);border-color:#b4dcc6;">
       <div class="sum-lbl">米国株（円換算）</div>
-      <div class="sum-val" id="us-annual-after">3,182</div>
-      <span id="us-annual" style="display:none;">3,182</span>
+      <div class="sum-val" id="us-annual-after">—</div>
+      <div class="sum-sub-tax"><span id="us-annual">—</span>（税引前）</div>
     </div>
     <div class="sum-card" style="background:#fef6e4;border-color:#e0d4b8;">
       <div class="sum-lbl">含み損益（円）</div>
-      <div class="sum-val up" id="total-gain">573,227</div>
-      <div class="sum-sub" id="total-gain-sub" style="display:none;">含み益（円）</div>
+      <div class="sum-val up" id="total-gain">—</div>
     </div>
   </div>
 
@@ -404,11 +404,9 @@ function updateTotals(){
   document.getElementById('jp-annual-after').textContent=fmtJpy(Math.round(jp*(1-0.20315)));
   document.getElementById('us-annual-after').textContent=fmtJpy(Math.round(us*(1-0.20315)));
   const gainEl=document.getElementById('total-gain');
-  const gainSub=document.getElementById('total-gain-sub');
   if(gainN>0){
     gainEl.innerHTML=fmtGainHtml(gain);
     gainEl.className='sum-val '+(gain>=0?'up':'down');
-    gainSub.textContent=gain>=0?'含み益（円）':'含み損（円）';
   }else{gainEl.textContent='—';gainEl.className='sum-val';}
 }
 
