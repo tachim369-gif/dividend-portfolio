@@ -219,6 +219,14 @@ input[type="number"]{-moz-appearance:textfield;}
       楽天証券CSV
     </button>
     <input type="file" id="csv-file" class="csv-input" accept=".csv" onchange="handleCSV(this)">
+    <button class="btn" style="border-color:#c8b4e0;color:#6a3d9a;background:#f3eef9;" onclick="saveSnapshot()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"></circle><line x1="8" y1="5" x2="8" y2="8"></line><line x1="8" y1="8" x2="10.5" y2="10.5"></line></svg>
+      記録
+    </button>
+    <button class="btn" style="border-color:#c8b4e0;color:#6a3d9a;background:#f3eef9;" onclick="openSnapshotModal()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="12" height="12" rx="1"></rect><line x1="5" y1="6" x2="11" y2="6"></line><line x1="5" y1="9" x2="11" y2="9"></line><line x1="5" y1="12" x2="8" y2="12"></line></svg>
+      履歴
+    </button>
     <button class="btn btn-danger" style="margin-left:auto;" onclick="resetAllData()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"></polyline><path d="M1,1 A7,7 0 1,1 0,8"></path></svg>
       データリセット
@@ -250,6 +258,23 @@ input[type="number"]{-moz-appearance:textfield;}
 </div>
 
 </main>
+
+<!-- Snapshot Modal -->
+<div class="overlay" id="snapshot-overlay" onclick="closeSnapshotOut(event)">
+  <div class="modal" id="snapshot-modal">
+    <div class="modal-hd">
+      <div>
+        <div class="modal-title">記録履歴</div>
+      </div>
+      <button class="modal-close" onclick="closeSnapshotModal()">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="14" y2="14"></line><line x1="14" y1="2" x2="2" y2="14"></line></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="snapshot-list"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Detail Modal -->
 <div class="overlay" id="overlay" onclick="closeOut(event)">
@@ -871,6 +896,63 @@ function parseCSV(text){
   portfolio=[...kept,...newRows];
   save();render();
   alert(`CSVを反映しました（新規${added}銘柄・更新${updated}銘柄）。CSVに無い銘柄は削除されました。${restored?`過去に入力した配当データを${restored}銘柄分復元しました。`:''}配当情報は各銘柄の詳細から入力してください。`);
+}
+
+/* ── Snapshot ── */
+const HK='divpf_v5_hist';
+function loadSnapshots(){try{return JSON.parse(localStorage.getItem(HK))||[];}catch(e){return[];}}
+function saveSnapshots(arr){localStorage.setItem(HK,JSON.stringify(arr));}
+
+function saveSnapshot(){
+  const afterTax=parseInt(document.getElementById('total-annual-after').textContent.replace(/,/g,'')||'0');
+  const preTax=parseInt(document.getElementById('total-annual').textContent.replace(/,/g,'')||'0');
+  const gain=parseInt((document.getElementById('total-gain').textContent||'0').replace(/,/g,''));
+  const gainPos=document.getElementById('total-gain').className.includes('up');
+  const now=new Date();
+  const dateStr=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
+  const arr=loadSnapshots();
+  arr.unshift({date:dateStr,afterTax,preTax,gain:gainPos?gain:-gain});
+  saveSnapshots(arr);
+  alert(`${dateStr} の記録を保存しました。`);
+}
+
+function openSnapshotModal(){
+  renderSnapshotList();
+  document.getElementById('snapshot-overlay').classList.add('open');
+}
+function closeSnapshotModal(){document.getElementById('snapshot-overlay').classList.remove('open');}
+function closeSnapshotOut(e){if(e.target===document.getElementById('snapshot-overlay'))closeSnapshotModal();}
+
+function delSnapshot(idx){
+  const arr=loadSnapshots();
+  arr.splice(idx,1);
+  saveSnapshots(arr);
+  renderSnapshotList();
+}
+
+function renderSnapshotList(){
+  const arr=loadSnapshots();
+  const el=document.getElementById('snapshot-list');
+  if(!arr.length){
+    el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:16px 0;">記録がありません。</div>';
+    return;
+  }
+  el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr style="background:var(--surface2);">
+      <th style="text-align:left;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">日付</th>
+      <th style="text-align:right;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当収入（円）</th>
+      <th style="text-align:right;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">含み損益（円）</th>
+      <th style="width:32px;border-bottom:1px solid var(--border);"></th>
+    </tr></thead>
+    <tbody>${arr.map((s,i)=>`<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:8px 10px;font-family:var(--mono);color:var(--text2);">${s.date}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:var(--mono);">${fmtJpy(s.afterTax)}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:var(--mono);color:${s.gain>=0?'var(--gain-up)':'var(--gain-down)'};">${fmtJpy(Math.abs(s.gain))}</td>
+      <td style="text-align:center;"><button class="del-btn" onclick="delSnapshot(${i})">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/></svg>
+      </button></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
 }
 
 function resetAllData(){
