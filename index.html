@@ -37,7 +37,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 main{max-width:1100px;margin:0 auto;padding:24px 24px 80px;}
 
 /* Summary */
-.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.sum-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
 .sum-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;}
 .sum-card.primary{background:var(--text);border-color:var(--text);}
 .sum-lbl{font-size:15px;color:var(--text);letter-spacing:.3px;margin-bottom:5px;font-weight:500;}
@@ -71,6 +71,7 @@ main{max-width:1100px;margin:0 auto;padding:24px 24px 80px;}
 .section-card-hd{padding:12px 16px;font-size:12px;font-weight:600;letter-spacing:.6px;}
 .section-card-hd.jp{color:var(--accent2);background:var(--accent2-bg);border-bottom:2px solid var(--accent2);}
 .section-card-hd.us{color:var(--accent);background:var(--accent-bg);border-bottom:2px solid var(--accent);}
+.section-card-hd.total{color:#a0304a;background:#fbe9ee;border-bottom:2px solid #e0a0b0;}
 table{width:100%;border-collapse:collapse;}
 thead th{padding:9px 10px;font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);}
 thead th:nth-child(-n+3){text-align:left;}
@@ -84,6 +85,7 @@ td input.left{text-align:left;font-family:var(--sans);}
 td input:focus{outline:none;border-bottom-color:var(--border2);}
 .name-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--text);text-align:left;padding:4px 10px;transition:all .15s;text-decoration:none;display:block;width:100%;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .name-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--accent2);}
+.name-btn.no-div{background:#e8e6e2;}
 .name-cell-wrap{display:flex;align-items:center;gap:4px;min-width:0;}
 .name-edit-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:none;background:none;color:var(--text3);cursor:pointer;border-radius:6px;transition:all .15s;}
 .name-edit-btn:hover{background:var(--surface2);color:var(--text2);}
@@ -156,7 +158,7 @@ input[type="number"]{-moz-appearance:textfield;}
 
 @media(max-width:780px){
   main{padding:16px 12px 80px;}
-  .sum-grid{grid-template-columns:repeat(4,1fr);gap:6px;}
+  .sum-grid{grid-template-columns:repeat(3,1fr);gap:6px;}
   .sum-card{padding:10px 8px;}
   .sum-lbl{font-size:11px;}
   .sum-val{font-size:14px;}
@@ -187,23 +189,31 @@ input[type="number"]{-moz-appearance:textfield;}
 <div class="tab-panel active" id="panel-portfolio">
   <div class="sum-grid">
     <div class="sum-card" style="background:#fbe9ee;border-color:#f2c2d2;">
-      <div class="sum-lbl">年間配当収入（円）</div>
+      <div class="sum-lbl">総配当収入（¥/年）</div>
       <div class="sum-val" id="total-annual-after">—</div>
       <div class="sum-sub-tax"><span id="total-annual">—</span>（税引前）</div>
     </div>
     <div class="sum-card" style="background:var(--accent2-bg);border-color:#b8d4f0;">
-      <div class="sum-lbl">日本株（円）</div>
+      <div class="sum-lbl">日本株配当収入（¥/年）</div>
       <div class="sum-val" id="jp-annual-after">—</div>
       <div class="sum-sub-tax"><span id="jp-annual">—</span>（税引前）</div>
     </div>
     <div class="sum-card" style="background:var(--accent-bg);border-color:#b4dcc6;">
-      <div class="sum-lbl">米国株（円換算）</div>
+      <div class="sum-lbl">米国株配当収入（¥/年）</div>
       <div class="sum-val" id="us-annual-after">—</div>
       <div class="sum-sub-tax"><span id="us-annual">—</span>（税引前）</div>
     </div>
     <div class="sum-card" style="background:#fef6e4;border-color:#e0d4b8;">
-      <div class="sum-lbl">含み損益（円）</div>
+      <div class="sum-lbl">含み損益（¥）</div>
       <div class="sum-val up" id="total-gain">—</div>
+    </div>
+    <div class="sum-card" style="background:#f0eef8;border-color:#c8b4e0;">
+      <div class="sum-lbl">取得利回り（税引後）</div>
+      <div class="sum-val" id="yield-cost">—</div>
+    </div>
+    <div class="sum-card" style="background:#f0eef8;border-color:#c8b4e0;">
+      <div class="sum-lbl">実勢利回り（税引後）</div>
+      <div class="sum-val" id="yield-mkt">—</div>
     </div>
   </div>
 
@@ -237,7 +247,7 @@ input[type="number"]{-moz-appearance:textfield;}
     <div class="section-card-hd jp">🇯🇵 日本株</div>
     <table style="table-layout:fixed;">
       <colgroup>
-        <col style="width:76px;"><col><col style="width:84px;"><col style="width:96px;"><col style="width:96px;"><col style="width:92px;"><col style="width:96px;"><col style="width:76px;"><col style="width:76px;"><col style="width:100px;"><col style="width:32px;"><col style="width:36px;">
+        <col style="width:60px;"><col><col style="width:40px;"><col style="width:78px;"><col style="width:78px;"><col style="width:85px;"><col style="width:85px;"><col style="width:78px;"><col style="width:78px;"><col style="width:76px;"><col style="width:76px;"><col style="width:85px;"><col style="width:32px;"><col style="width:36px;">
       </colgroup>
       <tbody id="portfolio-body-jp"></tbody>
     </table>
@@ -246,9 +256,29 @@ input[type="number"]{-moz-appearance:textfield;}
     <div class="section-card-hd us">🇺🇸 米国株</div>
     <table style="table-layout:fixed;">
       <colgroup>
-        <col style="width:76px;"><col><col style="width:84px;"><col style="width:96px;"><col style="width:96px;"><col style="width:92px;"><col style="width:96px;"><col style="width:76px;"><col style="width:76px;"><col style="width:100px;"><col style="width:32px;"><col style="width:36px;">
+        <col style="width:60px;"><col><col style="width:40px;"><col style="width:78px;"><col style="width:78px;"><col style="width:85px;"><col style="width:85px;"><col style="width:78px;"><col style="width:78px;"><col style="width:76px;"><col style="width:76px;"><col style="width:85px;"><col style="width:32px;"><col style="width:36px;">
       </colgroup>
       <tbody id="portfolio-body-us"></tbody>
+    </table>
+  </div>
+  <div class="table-wrap" id="card-total" style="margin-top:24px;">
+    <div class="section-card-hd total">📊 総合計</div>
+    <table style="table-layout:fixed;">
+      <colgroup>
+        <col style="width:60px;"><col><col style="width:40px;"><col style="width:78px;"><col style="width:78px;"><col style="width:85px;"><col style="width:85px;"><col style="width:78px;"><col style="width:78px;"><col style="width:76px;"><col style="width:76px;"><col style="width:85px;"><col style="width:32px;"><col style="width:36px;">
+      </colgroup>
+      <thead><tr style="background:var(--surface2);">
+        <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" colspan="5"></th>
+        <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得総額(¥)</th>
+        <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">実勢総額(¥)</th>
+        <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">含み損益(¥)</th>
+        <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当額</th>
+        <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得利回り</th>
+        <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">実勢利回り</th>
+        <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当計(¥)</th>
+        <th colspan="2" style="border-bottom:1px solid var(--border);"></th>
+      </tr></thead>
+      <tbody id="portfolio-body-total"></tbody>
     </table>
   </div>
   <div class="footer-note">
@@ -416,10 +446,17 @@ function gainJpy(r){
 /* ── Totals ── */
 function updateTotals(){
   let jp=0,us=0,jpN=0,usN=0,gain=0,gainN=0;
+  let totalCost=0,totalMkt=0;
   portfolio.forEach(r=>{
     if(r.market==='jp'){jp+=calcAnnualJpy(r);jpN++;}
     else{us+=calcAnnualJpy(r);usN++;}
     const g=gainJpy(r);if(g!==null){gain+=g;gainN++;}
+    if(r.shares&&r.buyPrice){
+      totalCost+=r.market==='us'?r.shares*r.buyPrice*getFx():r.shares*r.buyPrice;
+    }
+    if(r.shares&&r.mktPrice){
+      totalMkt+=r.market==='us'?r.shares*r.mktPrice*getFx():r.shares*r.mktPrice;
+    }
   });
   document.getElementById('total-annual').textContent=fmtJpy(jp+us);
   const afterTax=Math.round((jp+us)*(1-0.20315));
@@ -433,6 +470,10 @@ function updateTotals(){
     gainEl.innerHTML=fmtGainHtml(gain);
     gainEl.className='sum-val '+(gain>=0?'up':'down');
   }else{gainEl.textContent='—';gainEl.className='sum-val';}
+  const yc=document.getElementById('yield-cost');
+  const ym=document.getElementById('yield-mkt');
+  if(yc)yc.textContent=totalCost>0?(afterTax/totalCost*100).toFixed(2)+'%':'—';
+  if(ym)ym.textContent=totalMkt>0?(afterTax/totalMkt*100).toFixed(2)+'%':'—';
 }
 
 /* ── Click-to-edit for formatted cells ── */
@@ -466,24 +507,30 @@ function renderPortfolio(){
     const ann=calcAnnualJpy(r);
     const g=gainJpy(r);
     const mktStr=r.mktPrice?fmtPrice(r,r.mktPrice):'<span class="price-loading">—</span>';
+    const fx=getFx();
+    const costJpy=r.shares&&r.buyPrice?(r.market==='us'?r.shares*r.buyPrice*fx:r.shares*r.buyPrice):null;
+    const mktJpy=r.shares&&r.mktPrice?(r.market==='us'?r.shares*r.mktPrice*fx:r.shares*r.mktPrice):null;
+    const nc='text-align:right;font-family:var(--mono);font-size:13px;color:var(--text);';
     return`<tr data-id="${r.id}">
       <td style="text-align:left;"><input type="text" class="left" value="${r.code||''}" placeholder="コード" onchange="updRow('portfolio',${r.id},'code',this.value)" onfocus="this.select()"></td>
       <td style="text-align:left;">
         <div class="name-cell-wrap" id="name-wrap-${r.id}">
-          <button class="name-btn" id="name-btn-${r.id}" onclick="handleNameClick(${r.id})" ondblclick="event.stopPropagation();handleNameDblClick('portfolio',${r.id})" title="クリック:詳細 / ダブルクリック:名前編集">${r.name||'—'}</button>
+          <button class="name-btn${annualDiv(r)>0?'':' no-div'}" id="name-btn-${r.id}" onclick="handleNameClick(${r.id})" ondblclick="event.stopPropagation();handleNameDblClick('portfolio',${r.id})" title="クリック:詳細 / ダブルクリック:名前編集">${r.name||'—'}</button>
           ${r.name?'':`<button class="name-edit-btn" onclick="editName('portfolio',${r.id})" title="銘柄名を編集">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z"/></svg>
           </button>`}
         </div>
       </td>
-      <td class="hm" id="shares-cell-${r.id}" onclick="startEdit(this,${r.id},'shares')" style="cursor:text;">${r.shares?r.shares.toLocaleString('ja-JP'):'—'}</td>
-      <td class="hm" id="buyprice-cell-${r.id}" onclick="startEdit(this,${r.id},'buyPrice')" style="cursor:text;">${r.buyPrice?fmtPrice(r,r.buyPrice):'—'}</td>
-      <td class="hm" id="mkt-${r.id}">${mktStr}</td>
+      <td class="hm" id="shares-cell-${r.id}" onclick="startEdit(this,${r.id},'shares')" style="cursor:text;${nc}">${r.shares?r.shares.toLocaleString('ja-JP'):'—'}</td>
+      <td class="hm" id="buyprice-cell-${r.id}" onclick="startEdit(this,${r.id},'buyPrice')" style="cursor:text;${nc}">${r.buyPrice?fmtPrice(r,r.buyPrice):'—'}</td>
+      <td class="hm" id="mkt-${r.id}" style="${nc}">${mktStr}</td>
+      <td class="hm" style="${nc}">${costJpy!==null?fmtJpy(costJpy):'—'}</td>
+      <td class="hm" style="${nc}">${mktJpy!==null?fmtJpy(mktJpy):'—'}</td>
       <td class="hm" id="gain-${r.id}" style="font-family:var(--mono);font-size:13px;color:${g!==null?(g>=0?'var(--gain-up)':'var(--gain-down)'):'var(--text3)'};">${fmtGainHtml(g)}</td>
-      <td><span class="mono-cell" id="adiv-${r.id}">${adiv>0?adivStr:'—'}</span></td>
-      <td class="yld-buy" id="ybuy-${r.id}">${yb!==null?yb.toFixed(2)+'%':'—'}</td>
-      <td class="yld-mkt hm" id="ymkt-${r.id}">${ym!==null?ym.toFixed(2)+'%':'—'}</td>
-      <td class="bold-cell" id="ann-${r.id}">${ann>0?fmtJpy(ann):'—'}</td>
+      <td style="${nc}"><span id="adiv-${r.id}">${adiv>0?adivStr:'—'}</span></td>
+      <td id="ybuy-${r.id}" style="${nc}">${yb!==null?yb.toFixed(2)+'%':'—'}</td>
+      <td class="hm" id="ymkt-${r.id}" style="${nc}">${ym!==null?ym.toFixed(2)+'%':'—'}</td>
+      <td id="ann-${r.id}" style="${nc}">${ann>0?fmtJpy(ann):'—'}</td>
       <td style="text-align:center;">
         <a class="ir-link-btn" href="${r.market==='jp'?`https://irbank.net/${r.code}`:`https://finance.yahoo.com/quote/${r.code}/`}" target="_blank" rel="noopener" title="銘柄ページを開く">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>
@@ -505,38 +552,47 @@ function renderPortfolio(){
   const colHdJp=`<tr style="background:var(--surface2);">
     <th style="width:76px;text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">コード</th>
     <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">銘柄名</th>
-    <th style="width:84px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">保有株数</th>
-    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">購入単価(円)</th>
-    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢単価(円)</th>
-    <th style="width:92px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">含み損益(円)</th>
-    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当(円)</th>
-    <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">購入利回り</th>
+    <th style="width:40px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">株数</th>
+    <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">取得単価(¥)</th>
+    <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢単価(¥)</th>
+    <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">取得総額(¥)</th>
+    <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢総額(¥)</th>
+    <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">含み損益(¥)</th>
+    <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当額(¥)</th>
+    <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得利回り</th>
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢利回り</th>
-    <th style="width:100px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当計(円)</th>
+    <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当計(¥)</th>
     <th style="width:32px;border-bottom:1px solid var(--border);"></th>
     <th style="width:36px;border-bottom:1px solid var(--border);"></th>
   </tr>`;
   const colHdUs=`<tr style="background:var(--surface2);">
     <th style="width:76px;text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">コード</th>
     <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">銘柄名</th>
-    <th style="width:84px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">保有株数</th>
-    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">購入単価($)</th>
-    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢単価($)</th>
-    <th style="width:92px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">含み損益(円)</th>
-    <th style="width:96px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当($)</th>
-    <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">購入利回り</th>
+    <th style="width:40px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">株数</th>
+    <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">取得単価($)</th>
+    <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢単価($)</th>
+    <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">取得総額(¥)</th>
+    <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢総額(¥)</th>
+    <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">含み損益(¥)</th>
+    <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当額($)</th>
+    <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得利回り</th>
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢利回り</th>
-    <th style="width:100px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当計(円)</th>
+    <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当計(¥)</th>
     <th style="width:32px;border-bottom:1px solid var(--border);"></th>
     <th style="width:36px;border-bottom:1px solid var(--border);"></th>
   </tr>`;
   const totalRow=(rows,market)=>{
     const gainSum=rows.reduce((s,r)=>{const g=gainJpy(r);return g!==null?s+g:s;},0);
     const annSum=rows.reduce((s,r)=>s+calcAnnualJpy(r),0);
+    const fx=getFx();
+    const costSum=rows.reduce((s,r)=>r.shares&&r.buyPrice?s+(r.market==='us'?r.shares*r.buyPrice*fx:r.shares*r.buyPrice):s,0);
+    const mktSum=rows.reduce((s,r)=>r.shares&&r.mktPrice?s+(r.market==='us'?r.shares*r.mktPrice*fx:r.shares*r.mktPrice):s,0);
     const bg=market==='jp'?'var(--accent2-bg)':'var(--accent-bg)';
     return`<tr style="background:${bg};font-weight:600;">
       <td style="text-align:left;padding:8px 8px;font-size:12px;color:var(--text2);">合計</td>
       <td></td><td></td><td></td><td></td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);">${fmtJpy(costSum)}</td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);">${fmtJpy(mktSum)}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:${gainSum>=0?'var(--gain-up)':'var(--gain-down)'};">${fmtGainHtml(gainSum)}</td>
       <td></td><td></td><td></td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text);">${fmtJpy(annSum)}</td>
@@ -545,10 +601,34 @@ function renderPortfolio(){
   };
   tbJp.innerHTML=jpRows.length
     ?colHdJp+jpRows.map(mkRow).join('')+totalRow(jpRows,'jp')
-    :'<tr><td colspan="12" class="empty-state">日本株を追加するか、楽天証券CSVを読み込んでください</td></tr>';
+    :'<tr><td colspan="14" class="empty-state">日本株を追加するか、楽天証券CSVを読み込んでください</td></tr>';
   tbUs.innerHTML=usRows.length
     ?colHdUs+usRows.map(mkRow).join('')+totalRow(usRows,'us')
-    :'<tr><td colspan="12" class="empty-state">米国株を追加するか、楽天証券CSVを読み込んでください</td></tr>';
+    :'<tr><td colspan="14" class="empty-state">米国株を追加するか、楽天証券CSVを読み込んでください</td></tr>';
+
+    const allRows=[...jpRows,...usRows];
+  const tbTotal=document.getElementById('portfolio-body-total');
+  if(tbTotal&&allRows.length){
+    const fx=getFx();
+    const gainAll=allRows.reduce((s,r)=>{const g=gainJpy(r);return g!==null?s+g:s;},0);
+    const annAll=allRows.reduce((s,r)=>s+calcAnnualJpy(r),0);
+    const costAll=allRows.reduce((s,r)=>r.shares&&r.buyPrice?s+(r.market==='us'?r.shares*r.buyPrice*fx:r.shares*r.buyPrice):s,0);
+    const mktAll=allRows.reduce((s,r)=>r.shares&&r.mktPrice?s+(r.market==='us'?r.shares*r.mktPrice*fx:r.shares*r.mktPrice):s,0);
+    const annDiv=allRows.reduce((s,r)=>s+annualDiv(r)*(r.market==='us'?fx:1),0);
+    const yldCost=costAll>0?(annDiv/costAll*100):null;
+    const yldMkt=mktAll>0?(annDiv/mktAll*100):null;
+    tbTotal.innerHTML=`<tr style="background:#fbe9ee;font-weight:700;font-size:13px;">
+      <td style="text-align:left;padding:8px 8px;color:var(--text2);" colspan="5">合計</td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);color:var(--text2);">${fmtJpy(costAll)}</td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);color:var(--text2);">${fmtJpy(mktAll)}</td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);color:${gainAll>=0?'var(--gain-up)':'var(--gain-down)'};">${fmtGainHtml(gainAll)}</td>
+      <td></td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);color:var(--text2);">${yldCost!==null?yldCost.toFixed(2)+'%':'—'}</td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);color:var(--text2);">${yldMkt!==null?yldMkt.toFixed(2)+'%':'—'}</td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);color:var(--text);">${fmtJpy(annAll)}</td>
+      <td></td><td></td>
+    </tr>`;
+  }
   updateTotals();
 }
 
@@ -620,6 +700,8 @@ function refreshRowUI(listName,r){
     if(sc&&sc.querySelector('input')===null) sc.textContent=r.shares?r.shares.toLocaleString('ja-JP'):'—';
     const bc=document.getElementById('buyprice-cell-'+r.id);
     if(bc&&bc.querySelector('input')===null) bc.textContent=r.buyPrice?fmtPrice(r,r.buyPrice):'—';
+    const nb=document.getElementById('name-btn-'+r.id);
+    if(nb){annualDiv(r)>0?nb.classList.remove('no-div'):nb.classList.add('no-div');}
   }
   updateTotals();
 }
@@ -908,10 +990,14 @@ function saveSnapshot(){
   const preTax=parseInt(document.getElementById('total-annual').textContent.replace(/,/g,'')||'0');
   const gain=parseInt((document.getElementById('total-gain').textContent||'0').replace(/,/g,''));
   const gainPos=document.getElementById('total-gain').className.includes('up');
+  const yldCostStr=document.getElementById('yield-cost').textContent.replace('%','').trim();
+  const yldMktStr=document.getElementById('yield-mkt').textContent.replace('%','').trim();
+  const yldCost=parseFloat(yldCostStr)||null;
+  const yldMkt=parseFloat(yldMktStr)||null;
   const now=new Date();
   const dateStr=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
   const arr=loadSnapshots();
-  arr.unshift({date:dateStr,afterTax,preTax,gain:gainPos?gain:-gain});
+  arr.unshift({date:dateStr,afterTax,preTax,gain:gainPos?gain:-gain,yldCost,yldMkt});
   saveSnapshots(arr);
   alert(`${dateStr} の記録を保存しました。`);
 }
@@ -940,14 +1026,18 @@ function renderSnapshotList(){
   el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px;">
     <thead><tr style="background:var(--surface2);">
       <th style="text-align:left;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">日付</th>
-      <th style="text-align:right;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">年間配当収入（円）</th>
-      <th style="text-align:right;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">含み損益（円）</th>
+      <th style="text-align:right;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">総配当収入（¥/年）</th>
+      <th style="text-align:right;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">含み損益（¥）</th>
+      <th style="text-align:right;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得利回り</th>
+      <th style="text-align:right;padding:8px 10px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">実勢利回り</th>
       <th style="width:32px;border-bottom:1px solid var(--border);"></th>
     </tr></thead>
     <tbody>${arr.map((s,i)=>`<tr style="border-bottom:1px solid var(--border);">
       <td style="padding:8px 10px;font-family:var(--mono);color:var(--text2);">${s.date}</td>
-      <td style="padding:8px 10px;text-align:right;font-family:var(--mono);">${fmtJpy(s.afterTax)}</td>
-      <td style="padding:8px 10px;text-align:right;font-family:var(--mono);color:${s.gain>=0?'var(--gain-up)':'var(--gain-down)'};">${fmtJpy(Math.abs(s.gain))}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:var(--mono);font-size:13px;color:var(--text);">${fmtJpy(s.afterTax)}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:var(--mono);font-size:13px;color:${s.gain>=0?'var(--gain-up)':'var(--gain-down)'};">${fmtJpy(Math.abs(s.gain))}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:var(--mono);font-size:13px;color:var(--text);">${s.yldCost!=null?s.yldCost.toFixed(2)+'%':'—'}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:var(--mono);font-size:13px;color:var(--text);">${s.yldMkt!=null?s.yldMkt.toFixed(2)+'%':'—'}</td>
       <td style="text-align:center;"><button class="del-btn" onclick="delSnapshot(${i})">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="14" y2="14"/><line x1="14" y1="2" x2="2" y2="14"/></svg>
       </button></td>
