@@ -272,7 +272,7 @@ input[type="number"]{-moz-appearance:textfield;}
         <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得総額(¥)</th>
         <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">実勢総額(¥)</th>
         <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">含み損益(¥)</th>
-        <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当額</th>
+        <th style="border-bottom:1px solid var(--border);"></th>
         <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得利回り</th>
         <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">実勢利回り</th>
         <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当計(¥)</th>
@@ -435,8 +435,8 @@ function settleInfo(r){
   return[m,n?`年${n}回`:''].filter(Boolean).join('・');
 }
 function calcAnnualJpy(r){const d=annualDiv(r);return r.market==='us'?(r.shares||0)*d*getFx():(r.shares||0)*d;}
-function yldBuy(r){const d=annualDiv(r);return(r.buyPrice&&d)?(d/r.buyPrice*100):null;}
-function yldMkt(r){const d=annualDiv(r);return(r.mktPrice&&d)?(d/r.mktPrice*100):null;}
+function yldBuy(r){const d=annualDiv(r)*(1-0.20315);return(r.buyPrice&&d)?(d/r.buyPrice*100):null;}
+function yldMkt(r){const d=annualDiv(r)*(1-0.20315);return(r.mktPrice&&d)?(d/r.mktPrice*100):null;}
 function gainJpy(r){
   if(!r.mktPrice||!r.buyPrice||!r.shares)return null;
   const diff=(r.mktPrice-r.buyPrice)*r.shares;
@@ -588,13 +588,18 @@ function renderPortfolio(){
     const costSum=rows.reduce((s,r)=>r.shares&&r.buyPrice?s+(r.market==='us'?r.shares*r.buyPrice*fx:r.shares*r.buyPrice):s,0);
     const mktSum=rows.reduce((s,r)=>r.shares&&r.mktPrice?s+(r.market==='us'?r.shares*r.mktPrice*fx:r.shares*r.mktPrice):s,0);
     const bg=market==='jp'?'var(--accent2-bg)':'var(--accent-bg)';
+    const annDivSum=rows.reduce((s,r)=>s+annualDiv(r)*(r.market==='us'?fx:1),0)*(1-0.20315);
+    const yldCostSum=costSum>0?(annDivSum/costSum*100):null;
+    const yldMktSum=mktSum>0?(annDivSum/mktSum*100):null;
     return`<tr style="background:${bg};font-weight:600;">
       <td style="text-align:left;padding:8px 8px;font-size:12px;color:var(--text2);">合計</td>
       <td></td><td></td><td></td><td></td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);">${fmtJpy(costSum)}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);">${fmtJpy(mktSum)}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:${gainSum>=0?'var(--gain-up)':'var(--gain-down)'};">${fmtGainHtml(gainSum)}</td>
-      <td></td><td></td><td></td>
+      <td></td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);">${yldCostSum!==null?yldCostSum.toFixed(2)+'%':'—'}</td>
+      <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);" class="hm">${yldMktSum!==null?yldMktSum.toFixed(2)+'%':'—'}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text);">${fmtJpy(annSum)}</td>
       <td></td><td></td>
     </tr>`;
@@ -614,7 +619,7 @@ function renderPortfolio(){
     const annAll=allRows.reduce((s,r)=>s+calcAnnualJpy(r),0);
     const costAll=allRows.reduce((s,r)=>r.shares&&r.buyPrice?s+(r.market==='us'?r.shares*r.buyPrice*fx:r.shares*r.buyPrice):s,0);
     const mktAll=allRows.reduce((s,r)=>r.shares&&r.mktPrice?s+(r.market==='us'?r.shares*r.mktPrice*fx:r.shares*r.mktPrice):s,0);
-    const annDiv=allRows.reduce((s,r)=>s+annualDiv(r)*(r.market==='us'?fx:1),0);
+    const annDiv=allRows.reduce((s,r)=>s+annualDiv(r)*(r.market==='us'?fx:1),0)*(1-0.20315);
     const yldCost=costAll>0?(annDiv/costAll*100):null;
     const yldMkt=mktAll>0?(annDiv/mktAll*100):null;
     tbTotal.innerHTML=`<tr style="background:#fbe9ee;font-weight:700;font-size:13px;">
