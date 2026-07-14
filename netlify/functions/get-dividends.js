@@ -1,3 +1,18 @@
+async function fetchFollow(url, options, maxRedirects) {
+  let currentUrl = url;
+  for (let i = 0; i <= maxRedirects; i++) {
+    const res = await fetch(currentUrl, Object.assign({}, options, { redirect: 'manual' }));
+    if ([301, 302, 303, 307, 308].indexOf(res.status) !== -1) {
+      const loc = res.headers.get('location');
+      if (!loc) return res;
+      currentUrl = new URL(loc, currentUrl).toString();
+      continue;
+    }
+    return res;
+  }
+  throw new Error('too many redirects');
+}
+
 exports.handler = async function(event) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -17,14 +32,14 @@ exports.handler = async function(event) {
     await Promise.all((codes || []).map(async ({ code }) => {
       try {
         const url = `https://f.irbank.net/files/${code}/fy-stock-dividend.json`;
-        const res = await fetch(url, {
+        const res = await fetchFollow(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'application/json,text/plain,*/*',
             'Accept-Language': 'ja,en;q=0.8',
             'Referer': 'https://irbank.net/'
           }
-        });
+        }, 5);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const item = data && data.item;
