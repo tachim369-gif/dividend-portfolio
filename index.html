@@ -842,6 +842,7 @@ async function updateAllDividends(){
     });
     const data=await res.json();
     const dividends=data.dividends||{};
+    const funcErrors=data.errors||{};
     let updated=0;
     const skipped=[];
     jpRows.forEach(r=>{
@@ -851,7 +852,8 @@ async function updateAllDividends(){
         syncDiv(r);
         updated++;
       }else{
-        skipped.push(`${r.code} ${r.name||''}`.trim());
+        const reason=funcErrors[r.code]?`（${funcErrors[r.code]}）`:'';
+        skipped.push(`${r.code} ${r.name||''}`.trim()+reason);
       }
     });
     save();render();
