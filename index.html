@@ -826,6 +826,16 @@ async function updateAllPrices(){
 }
 
 /* ── 配当一括自動取得（IRBANK JSONフィード経由） ── */
+async function fetchDividendsBatch(codes){
+  const res=await fetch('/.netlify/functions/get-dividends',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({codes})
+  });
+  const data=await res.json();
+  return {dividends:data.dividends||{},errors:data.errors||{}};
+}
+
 async function updateAllDividends(){
   const btn=document.getElementById('bulkdiv-btn');
   const label=document.getElementById('bulkdiv-btn-label');
@@ -834,26 +844,32 @@ async function updateAllDividends(){
   btn.disabled=true;
   label.textContent='配当取得中...';
   try{
-    const codes=rows.map(r=>({code:r.code,market:r.market}));
-    const res=await fetch('/.netlify/functions/get-dividends',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({codes})
-    });
-    const data=await res.json();
-    const dividends=data.dividends||{};
-    const funcErrors=data.errors||{};
+    const maxRounds=4;
+    let pending=rows.map(r=>({code:r.code,market:r.market}));
+    const allDividends={};
+    const allErrors={};
+    for(let round=1;round<=maxRounds&&pending.length;round++){
+      label.textContent=round===1?'配当取得中...':`再試行中(${round-1}/${maxRounds-1})...`;
+      const {dividends,errors}=await fetchDividendsBatch(pending);
+      Object.assign(allDividends,dividends);
+      Object.assign(allErrors,errors);
+      pending=pending.filter(c=>!(c.code in dividends));
+      if(pending.length&&round<maxRounds){
+        await new Promise(r=>setTimeout(r,1500));
+      }
+    }
     let updated=0;
     const skippedJp=[];
     const skippedUs=[];
     rows.forEach(r=>{
-      const v=dividends[r.code];
-      if(v!=null&&v>0){
-        r.periods=[{id:uid(),label:'年間配当（自動取得）',div:v,exDate:'',payDate:''}];
+      const v=allDividends[r.code];
+      if(v!=null){
+        const noDiv=v===0;
+        r.periods=[{id:uid(),label:noDiv?'年間配当（自動取得・配当なし）':'年間配当（自動取得）',div:v,exDate:'',payDate:''}];
         syncDiv(r);
         updated++;
       }else{
-        const reason=funcErrors[r.code]?`（${funcErrors[r.code]}）`:'';
+        const reason=allErrors[r.code]?`（${allErrors[r.code]}）`:'';
         const line=`${r.code} ${r.name||''}`.trim()+reason;
         (r.market==='us'?skippedUs:skippedJp).push(line);
       }
@@ -863,7 +879,7 @@ async function updateAllDividends(){
     label.textContent=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 更新済`;
     const skipped=skippedJp.length+skippedUs.length;
     if(skipped){
-      let msg=`${updated}銘柄の配当を自動更新しました。\n\n取得できなかった銘柄（${skipped}件）:\n`;
+      let msg=`${updated}銘柄の配当を自動更新しました。\n\n${maxRounds}回試しても取得できなかった銘柄（${skipped}件）:\n`;
       if(skippedJp.length)msg+=`\n[日本株]\n${skippedJp.join('\n')}`;
       if(skippedUs.length)msg+=`\n[米国株]\n${skippedUs.join('\n')}`;
       msg+=`\n\n日本株は隣の✎ボタンから手動更新の指示文を生成できます。米国株は詳細モーダルから直接編集してください。`;
