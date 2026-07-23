@@ -3,19 +3,38 @@ function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-async function withRetry(fn, maxAttempts) {
+// Netlify Functionsの実行時間上限に配慮し、締め切り時刻を過ぎたら早めに諦める
+async function withRetry(fn, maxAttempts, deadline) {
   let lastErr = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (Date.now() > deadline) {
+      throw lastErr || new Error('deadline exceeded');
+    }
     try {
       return await fn();
     } catch (e) {
       lastErr = e;
-      if (attempt < maxAttempts) {
-        await sleep(400 * attempt + Math.floor(Math.random() * 300));
+      if (attempt < maxAttempts && Date.now() < deadline) {
+        await sleep(Math.min(500 * attempt + Math.floor(Math.random() * 400), Math.max(0, deadline - Date.now())));
       }
     }
   }
   throw lastErr;
+}
+
+// 同時実行数を絞ってタスクを処理する（サーバー側のアクセス制限を避けるため）
+async function runWithConcurrency(items, worker, concurrency) {
+  let idx = 0;
+  async function runNext() {
+    while (idx < items.length) {
+      const i = idx++;
+      await worker(items[i]);
+    }
+  }
+  const pool = [];
+  const n = Math.min(concurrency, items.length);
+  for (let i = 0; i < n; i++) pool.push(runNext());
+  await Promise.all(pool);
 }
 
 /* ── 日本株：IRBANKの配当データファイルを利用 ── */
@@ -34,6 +53,8 @@ async function fetchFollow(url, options, maxRedirects) {
   throw new Error('too many redirects');
 }
 
+// 戻り値: 一株配当（円）。取得は成功したが配当データが無い場合は0を返す（確定値）。
+// 通信エラー・想定外の応答の場合は例外を投げる（呼び出し側でリトライ対象）。
 async function fetchDividendJp(code) {
   const url = `https://f.irbank.net/files/${code}/fy-stock-dividend.json`;
   const res = await fetchFollow(url, {
@@ -58,10 +79,12 @@ async function fetchDividendJp(code) {
     const val = parseFloat(raw);
     if (!isNaN(val) && val > 0) return val;
   }
-  throw new Error('no valid value in item');
+  // データ取得は成功したが、どの年度にも有効な配当額が無い → 配当なしと確定
+  return 0;
 }
 
 /* ── 米国株：Yahoo Financeの配当イベント（実績）を直近12ヶ月分合計 ── */
+// 戻り値: 一株配当（ドル）。配当イベントが無い銘柄（無配企業など）は0を返す（確定値）。
 async function fetchDividendUs(code) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${code}?interval=1d&range=1y&events=div`;
   const res = await fetch(url, {
@@ -74,8 +97,10 @@ async function fetchDividendUs(code) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
   const result = data && data.chart && data.chart.result && data.chart.result[0];
-  const divEvents = result && result.events && result.events.dividends;
-  if (!divEvents) throw new Error('no dividend events in response');
+  if (!result) throw new Error('no result field in response');
+
+  const divEvents = result.events && result.events.dividends;
+  if (!divEvents) return 0; // 配当イベントが無い＝無配と確定
 
   const nowSec = Date.now() / 1000;
   const oneYearAgoSec = nowSec - 365 * 24 * 3600;
@@ -89,8 +114,7 @@ async function fetchDividendUs(code) {
       count++;
     }
   });
-  if (count === 0) throw new Error('no recent dividend events');
-  return Math.round(total * 100) / 100;
+  return count > 0 ? Math.round(total * 100) / 100 : 0; // 直近1年に配当が無ければ0と確定
 }
 
 exports.handler = async function(event) {
@@ -109,18 +133,21 @@ exports.handler = async function(event) {
     const dividends = {};
     const errors = {};
     const maxAttempts = 3;
+    const concurrency = 8;
+    const deadline = Date.now() + 15000; // 全体の締め切り（15秒、Netlify関数のタイムアウト対策）
 
-    await Promise.all((codes || []).map(async ({ code, market }) => {
+    await runWithConcurrency(codes || [], async ({ code, market }) => {
       try {
         const val = await withRetry(
           () => (market === 'us' ? fetchDividendUs(code) : fetchDividendJp(code)),
-          maxAttempts
+          maxAttempts,
+          deadline
         );
-        dividends[code] = val;
+        dividends[code] = val; // 0も含めて「取得成功」
       } catch (e) {
         errors[code] = e.message;
       }
-    }));
+    }, concurrency);
 
     return { statusCode: 200, headers, body: JSON.stringify({ dividends, errors }) };
   } catch (e) {
