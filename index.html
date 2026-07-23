@@ -829,12 +829,12 @@ async function updateAllPrices(){
 async function updateAllDividends(){
   const btn=document.getElementById('bulkdiv-btn');
   const label=document.getElementById('bulkdiv-btn-label');
-  const jpRows=portfolio.filter(r=>r.market==='jp'&&r.code);
-  if(!jpRows.length){alert('コード登録済みの日本株がありません。');return;}
+  const rows=portfolio.filter(r=>r.code);
+  if(!rows.length){alert('コード登録済みの銘柄がありません。');return;}
   btn.disabled=true;
   label.textContent='配当取得中...';
   try{
-    const codes=jpRows.map(r=>({code:r.code}));
+    const codes=rows.map(r=>({code:r.code,market:r.market}));
     const res=await fetch('/.netlify/functions/get-dividends',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -844,8 +844,9 @@ async function updateAllDividends(){
     const dividends=data.dividends||{};
     const funcErrors=data.errors||{};
     let updated=0;
-    const skipped=[];
-    jpRows.forEach(r=>{
+    const skippedJp=[];
+    const skippedUs=[];
+    rows.forEach(r=>{
       const v=dividends[r.code];
       if(v!=null&&v>0){
         r.periods=[{id:uid(),label:'年間配当（自動取得）',div:v,exDate:'',payDate:''}];
@@ -853,14 +854,20 @@ async function updateAllDividends(){
         updated++;
       }else{
         const reason=funcErrors[r.code]?`（${funcErrors[r.code]}）`:'';
-        skipped.push(`${r.code} ${r.name||''}`.trim()+reason);
+        const line=`${r.code} ${r.name||''}`.trim()+reason;
+        (r.market==='us'?skippedUs:skippedJp).push(line);
       }
     });
     save();render();
     const now=new Date();
     label.textContent=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 更新済`;
-    if(skipped.length){
-      alert(`${updated}銘柄の配当を自動更新しました。\n\n取得できなかった銘柄（${skipped.length}件）:\n${skipped.join('\n')}\n\nこれらは隣の✎ボタンから手動更新の指示文を生成できます。`);
+    const skipped=skippedJp.length+skippedUs.length;
+    if(skipped){
+      let msg=`${updated}銘柄の配当を自動更新しました。\n\n取得できなかった銘柄（${skipped}件）:\n`;
+      if(skippedJp.length)msg+=`\n[日本株]\n${skippedJp.join('\n')}`;
+      if(skippedUs.length)msg+=`\n[米国株]\n${skippedUs.join('\n')}`;
+      msg+=`\n\n日本株は隣の✎ボタンから手動更新の指示文を生成できます。米国株は詳細モーダルから直接編集してください。`;
+      alert(msg);
     }
   }catch(e){
     console.error(e);
