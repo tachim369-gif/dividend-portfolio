@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0044)https://benevolent-froyo-f6fc50.netlify.app/ -->
 <html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,10 +28,6 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .fx-label{font-size:12px;color:var(--text2);}
 .fx-input{font-family:var(--mono);font-size:13px;width:88px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);color:var(--text);text-align:right;}
 .fx-input:focus{outline:none;border-color:var(--border2);}
-.price-update-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);cursor:pointer;transition:all .15s;white-space:nowrap;}
-.price-update-btn:hover{background:var(--surface);border-color:var(--border2);color:var(--text);}
-.price-update-btn:disabled{opacity:.5;cursor:not-allowed;}
-.last-updated{display:none;}
 
 main{max-width:1100px;margin:0 auto;padding:24px 24px 80px;}
 
@@ -61,8 +56,8 @@ main{max-width:1100px;margin:0 auto;padding:24px 24px 80px;}
 .btn-jp:hover{background:#d0e4f8;}
 .btn-us{border-color:#b4dcc6;color:var(--accent);background:var(--accent-bg);}
 .btn-us:hover{background:#cceeda;}
-.btn-csv{border-color:#e0d4b8;color:var(--warn);background:var(--warn-bg);}
-.btn-csv:hover{background:#f5e8c4;}
+.btn-rkt{border-color:#e0d4b8;color:var(--warn);background:var(--warn-bg);}
+.btn-rkt:hover{background:#f5e8c4;}
 .btn-danger{border-color:#f0c4bb;color:var(--danger);background:var(--danger-bg);}
 
 
@@ -109,7 +104,6 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 .yld-mkt{font-family:var(--mono);font-size:13px;color:var(--text2);}
 
 .footer-note{margin-top:12px;font-size:11px;color:var(--text3);line-height:1.7;}
-.csv-input{display:none;}
 
 /* Modal */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:stretch;justify-content:flex-start;padding:0;}
@@ -148,12 +142,12 @@ input[type="number"]{-moz-appearance:textfield;}
 .annual-total .annual-total-sub{font-size:11px;color:var(--text3);margin-bottom:3px;}
 .annual-total .annual-total-val{width:100%;max-width:200px;box-sizing:border-box;font-family:var(--mono);font-size:13px;font-weight:400;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
 
-.bulkdiv-desc{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;}
-.bulkdiv-textarea{width:100%;min-height:420px;box-sizing:border-box;font-family:var(--mono);font-size:12px;line-height:1.6;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);color:var(--text);resize:vertical;white-space:pre;}
-.bulkdiv-textarea:focus{outline:none;border-color:var(--border2);}
-.bulkdiv-actions{display:flex;align-items:center;gap:10px;margin-top:10px;}
-.bulkdiv-status{font-size:12px;color:var(--accent);}
-.bulkdiv-count{font-size:12px;color:var(--text3);margin-bottom:8px;}
+.rkt-desc{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;}
+.rkt-textarea{width:100%;min-height:420px;box-sizing:border-box;font-family:var(--mono);font-size:12px;line-height:1.6;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);color:var(--text);resize:vertical;white-space:pre;}
+.rkt-textarea:focus{outline:none;border-color:var(--border2);}
+.rkt-actions{display:flex;align-items:center;gap:10px;margin-top:10px;}
+.rkt-status{font-size:12px;color:var(--accent);}
+.rkt-count{font-size:12px;color:var(--text3);margin-bottom:8px;}
 
 .ref-links{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
 .ref-link{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);text-decoration:none;transition:all .15s;}
@@ -182,11 +176,6 @@ input[type="number"]{-moz-appearance:textfield;}
     <span class="fx-label">USD/JPY</span>
     <input type="number" class="fx-input" id="fx-rate" value="155" min="100" max="300" step="0.1">
     <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
-    <button class="price-update-btn" id="price-btn" onclick="updateAllPrices()" style="flex-shrink:0;white-space:nowrap;min-width:180px;justify-content:center;">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"></polyline><path d="M1,1 A7,7 0 1,1 0,8"></path></svg>
-      <span id="price-btn-label">株価更新</span>
-    </button>
-    <span class="last-updated" id="last-updated"></span>
   </div>
 </header>
 
@@ -231,11 +220,10 @@ input[type="number"]{-moz-appearance:textfield;}
     <button class="btn btn-us" onclick="addRow(&#39;portfolio&#39;,&#39;us&#39;)">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"></line><line x1="2" y1="8" x2="14" y2="8"></line></svg>米国株
     </button>
-    <button class="btn btn-csv" onclick="document.getElementById(&#39;csv-file&#39;).click()">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12V4a1 1 0 011-1h5l3 3v6a1 1 0 01-1 1H4a1 1 0 01-1-1z"></path><path d="M9 3v3h3"></path><line x1="6" y1="8" x2="10" y2="8"></line><line x1="6" y1="10.5" x2="10" y2="10.5"></line></svg>
-      楽天証券CSV
+    <button class="btn btn-rkt" id="rakuten-btn" onclick="openRakutenModal()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a5 5 0 019-3"></path><path d="M13 8a5 5 0 01-9 3"></path><polyline points="12,2 12,5 9,5"></polyline><polyline points="4,14 4,11 7,11"></polyline></svg>
+      楽天証券から更新
     </button>
-    <input type="file" id="csv-file" class="csv-input" accept=".csv" onchange="handleCSV(this)">
     <button class="btn" style="border-color:#c8b4e0;color:#6a3d9a;background:#f3eef9;" onclick="saveSnapshot()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"></circle><line x1="8" y1="5" x2="8" y2="8"></line><line x1="8" y1="8" x2="10.5" y2="10.5"></line></svg>
       記録
@@ -243,13 +231,6 @@ input[type="number"]{-moz-appearance:textfield;}
     <button class="btn" style="border-color:#c8b4e0;color:#6a3d9a;background:#f3eef9;" onclick="openSnapshotModal()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="12" height="12" rx="1"></rect><line x1="5" y1="6" x2="11" y2="6"></line><line x1="5" y1="9" x2="11" y2="9"></line><line x1="5" y1="12" x2="8" y2="12"></line></svg>
       履歴
-    </button>
-    <button class="btn" id="bulkdiv-btn" style="border-color:#b8d4f0;color:var(--accent2);background:var(--accent2-bg);" onclick="updateAllDividends()">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a5 5 0 019-3"></path><path d="M13 8a5 5 0 01-9 3"></path><polyline points="12,2 12,5 9,5"></polyline><polyline points="4,14 4,11 7,11"></polyline></svg>
-      <span id="bulkdiv-btn-label">一括配当更新</span>
-    </button>
-    <button class="btn" style="padding:7px 9px;color:var(--text3);border-style:dashed;" onclick="openBulkDivModal()" title="自動取得できなかった銘柄をClaudeで手動更新する指示文を生成">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z"/></svg>
     </button>
     <button class="btn btn-danger" style="margin-left:auto;" onclick="resetAllData()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"></polyline><path d="M1,1 A7,7 0 1,1 0,8"></path></svg>
@@ -296,7 +277,7 @@ input[type="number"]{-moz-appearance:textfield;}
     </table>
   </div>
   <div class="footer-note">
-    ※ 利回り(買)=購入単価基準、利回り(現)=実勢単価基準。実勢単価は「株価を更新」ボタンで取得。<br>
+    ※ 利回り(買)=購入単価基準、利回り(現)=実勢単価基準。実勢単価は「楽天証券から更新」ボタンで取得。<br>
     ※ 「詳細 ↗」で配当スケジュール・過去10年履歴を管理できます。データはブラウザに保存されます。
   </div>
 </div>
@@ -320,28 +301,28 @@ input[type="number"]{-moz-appearance:textfield;}
   </div>
 </div>
 
-<!-- Bulk Dividend Update Modal -->
-<div class="overlay" id="bulkdiv-overlay" onclick="closeBulkDivOut(event)">
-  <div class="modal" id="bulkdiv-modal">
+<!-- Rakuten Update Modal -->
+<div class="overlay" id="rakuten-overlay" onclick="closeRakutenOut(event)">
+  <div class="modal" id="rakuten-modal">
     <div class="modal-hd">
       <div>
-        <div class="modal-title">一括配当更新の指示文</div>
+        <div class="modal-title">楽天証券から更新の指示文</div>
         <div class="modal-sub">Claude in Chrome の右パネルにコピペしてください</div>
       </div>
-      <button class="modal-close" onclick="closeBulkDivModal()">
+      <button class="modal-close" onclick="closeRakutenModal()">
         <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="2" x2="14" y2="14"></line><line x1="14" y1="2" x2="2" y2="14"></line></svg>
       </button>
     </div>
     <div class="modal-body">
-      <div class="bulkdiv-desc">通常は「一括配当更新」ボタン（自動取得）で完結します。これは自動取得できなかった銘柄など、手動でIRBANKを確認したい場合の指示文です。対象は銘柄コード登録済みの日本株のみです。このアプリのタブを開いたまま、生成された指示文をClaudeの右パネルに貼り付けて実行してください。</div>
-      <div class="bulkdiv-count" id="bulkdiv-count"></div>
-      <textarea class="bulkdiv-textarea" id="bulkdiv-textarea" readonly onclick="this.select()"></textarea>
-      <div class="bulkdiv-actions">
-        <button class="btn btn-jp" onclick="copyBulkDivPrompt()">
+      <div class="rkt-desc">楽天証券に事前にログインしておいてください。生成された指示文をClaudeの右パネルに貼り付けて実行すると、株数・取得単価・現在値・為替レート・配当情報（日本株は中間・期末の内訳、米国株は年間配当額）をまとめて取得し、このアプリに入力します。</div>
+      <div class="rkt-count" id="rakuten-count"></div>
+      <textarea class="rkt-textarea" id="rakuten-textarea" readonly onclick="this.select()"></textarea>
+      <div class="rkt-actions">
+        <button class="btn btn-jp" onclick="copyRakutenPrompt()">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="5" width="9" height="9" rx="1"></rect><path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2"></path></svg>
           コピー
         </button>
-        <span class="bulkdiv-status" id="bulkdiv-status"></span>
+        <span class="rkt-status" id="rakuten-status"></span>
       </div>
     </div>
   </div>
@@ -647,10 +628,10 @@ function renderPortfolio(){
   };
   tbJp.innerHTML=jpRows.length
     ?colHdJp+jpRows.map(mkRow).join('')+totalRow(jpRows,'jp')
-    :'<tr><td colspan="14" class="empty-state">日本株を追加するか、楽天証券CSVを読み込んでください</td></tr>';
+    :'<tr><td colspan="14" class="empty-state">日本株を追加するか、「楽天証券から更新」で一括登録してください</td></tr>';
   tbUs.innerHTML=usRows.length
     ?colHdUs+usRows.map(mkRow).join('')+totalRow(usRows,'us')
-    :'<tr><td colspan="14" class="empty-state">米国株を追加するか、楽天証券CSVを読み込んでください</td></tr>';
+    :'<tr><td colspan="14" class="empty-state">米国株を追加するか、「楽天証券から更新」で一括登録してください</td></tr>';
 
     const allRows=[...jpRows,...usRows];
   const tbTotal=document.getElementById('portfolio-body-total');
@@ -781,118 +762,6 @@ function defPeriods(market){
   ];
 }
 
-/* ── Price update via Yahoo Finance (proxy-free approach) ── */
-async function updateAllPrices(){
-  const btn=document.getElementById('price-btn');
-  const lastUpdated=document.getElementById('last-updated');
-  btn.disabled=true;
-  document.getElementById('price-btn-label').textContent='取得中...';
-  const allRows=portfolio.filter(r=>r.code);
-  if(!allRows.length){btn.disabled=false;return;}
-
-
-  try{
-    const codes=allRows.map(r=>({code:r.code,market:r.market}));
-    const res=await fetch('/.netlify/functions/get-prices',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({codes})
-    });
-    const data=await res.json();
-    const prices=data.prices||{};
-
-    // 為替レート自動反映
-    if(prices['USDJPY']){
-      const fxRate=Math.round(parseFloat(prices['USDJPY'])*100)/100;
-      document.getElementById('fx-rate').value=fxRate;
-    }
-
-    let updated=0;
-    allRows.forEach(r=>{
-      if(prices[r.code]!=null){
-        r.mktPrice=parseFloat(prices[r.code]);
-        updated++;
-        refreshRowUI('portfolio',r);
-      }
-    });
-    save();render();
-    const now=new Date();
-    document.getElementById('price-btn-label').textContent=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 更新済`;
-  }catch(e){
-    console.error(e);
-    document.getElementById('price-btn-label').textContent='取得失敗';
-  }
-  btn.disabled=false;
-}
-
-/* ── 配当一括自動取得（IRBANK JSONフィード経由） ── */
-async function fetchDividendsBatch(codes){
-  const res=await fetch('/.netlify/functions/get-dividends',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({codes})
-  });
-  const data=await res.json();
-  return {dividends:data.dividends||{},errors:data.errors||{}};
-}
-
-async function updateAllDividends(){
-  const btn=document.getElementById('bulkdiv-btn');
-  const label=document.getElementById('bulkdiv-btn-label');
-  const rows=portfolio.filter(r=>r.code);
-  if(!rows.length){alert('コード登録済みの銘柄がありません。');return;}
-  btn.disabled=true;
-  label.textContent='配当取得中...';
-  try{
-    const maxRounds=4;
-    let pending=rows.map(r=>({code:r.code,market:r.market}));
-    const allDividends={};
-    const allErrors={};
-    for(let round=1;round<=maxRounds&&pending.length;round++){
-      label.textContent=round===1?'配当取得中...':`再試行中(${round-1}/${maxRounds-1})...`;
-      const {dividends,errors}=await fetchDividendsBatch(pending);
-      Object.assign(allDividends,dividends);
-      Object.assign(allErrors,errors);
-      pending=pending.filter(c=>!(c.code in dividends));
-      if(pending.length&&round<maxRounds){
-        await new Promise(r=>setTimeout(r,1500));
-      }
-    }
-    let updated=0;
-    const skippedJp=[];
-    const skippedUs=[];
-    rows.forEach(r=>{
-      const v=allDividends[r.code];
-      if(v!=null){
-        const noDiv=v===0;
-        r.periods=[{id:uid(),label:noDiv?'年間配当（自動取得・配当なし）':'年間配当（自動取得）',div:v,exDate:'',payDate:''}];
-        syncDiv(r);
-        updated++;
-      }else{
-        const reason=allErrors[r.code]?`（${allErrors[r.code]}）`:'';
-        const line=`${r.code} ${r.name||''}`.trim()+reason;
-        (r.market==='us'?skippedUs:skippedJp).push(line);
-      }
-    });
-    save();render();
-    const now=new Date();
-    label.textContent=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 更新済`;
-    const skipped=skippedJp.length+skippedUs.length;
-    if(skipped){
-      let msg=`${updated}銘柄の配当を自動更新しました。\n\n${maxRounds}回試しても取得できなかった銘柄（${skipped}件）:\n`;
-      if(skippedJp.length)msg+=`\n[日本株]\n${skippedJp.join('\n')}`;
-      if(skippedUs.length)msg+=`\n[米国株]\n${skippedUs.join('\n')}`;
-      msg+=`\n\n日本株は隣の✎ボタンから手動更新の指示文を生成できます。米国株は詳細モーダルから直接編集してください。`;
-      alert(msg);
-    }
-  }catch(e){
-    console.error(e);
-    label.textContent='取得失敗';
-    alert('配当データの取得に失敗しました。しばらくしてから再度お試しください。');
-  }
-  btn.disabled=false;
-}
-
 /* ── Modal ── */
 function openModal(listName,id){
   curList=listName;curId=id;
@@ -1011,89 +880,6 @@ function closeModal(){
 function closeOut(e){if(e.target===document.getElementById('overlay'))closeModal();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();}});
 
-/* ── CSV ── */
-function handleCSV(input){
-  const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>parseCSV(e.target.result);
-  reader.readAsText(file,'Shift_JIS');input.value='';
-}
-function parseCSVLine(line){
-  // ダブルクオートで囲まれた項目内のカンマ（桁区切りなど）を無視して正しく分割する
-  const result=[];
-  let cur='',inQ=false;
-  for(let i=0;i<line.length;i++){
-    const ch=line[i];
-    if(inQ){
-      if(ch==='"'){
-        if(line[i+1]==='"'){cur+='"';i++;}
-        else inQ=false;
-      }else cur+=ch;
-    }else{
-      if(ch==='"')inQ=true;
-      else if(ch===','){result.push(cur);cur='';}
-      else cur+=ch;
-    }
-  }
-  result.push(cur);
-  return result;
-}
-function parseCSV(text){
-  const lines=text.split(/\r?\n/).filter(l=>l.trim());
-  const num=v=>parseFloat((v||'').replace(/,/g,''))||0;
-  // CSV内に「参考為替レート」が記載されていればそれを使う（米国株の円換算購入単価をドルに戻すため）
-  const fxMatch=text.match(/参考為替レート[^"]*"\s*,\s*"([\d.]+)"/);
-  const fx=(fxMatch?parseFloat(fxMatch[1]):0)||getFx();
-  const csvRows=[]; // {code,market,name,shares,buyPrice,mktPrice}
-  for(const line of lines){
-    const cols=parseCSVLine(line).map(c=>c.trim());
-    const code=cols[0]||'';
-    const isJp=/^\d{4}$/.test(code),isUs=/^[A-Z]{1,5}$/.test(code);
-    if(!isJp&&!isUs)continue;
-    const market=isJp?'jp':'us';
-    const name=cols[1]||code;
-    let shares,buyPrice,mktPrice;
-    if(isJp){
-      // 日本株CSV列構成: コード,銘柄名,保有数量,執行中,内訳通常数量,内訳積立数量,平均取得価額(円),取得総額,現在値(円),前日比,時価評価額,評価損益
-      shares=num(cols[2]);buyPrice=num(cols[6]);mktPrice=num(cols[8]);
-    }else{
-      // 米国株CSV列構成: ティッカー,銘柄名,取引所,保有数量,執行中数量,内訳通常数量,内訳積立数量,表示通貨,平均取得価額(円),取得総額,現在値(USドル),前日比,時価評価額,評価損益
-      // ※平均取得価額は円換算で記載されているため、参考為替レートでドルに換算する
-      shares=num(cols[3]);
-      const buyPriceYen=num(cols[8]);
-      buyPrice=fx>0?Math.round((buyPriceYen/fx)*100)/100:0;
-      mktPrice=num(cols[10]);
-    }
-    csvRows.push({code,market,name,shares,buyPrice,mktPrice});
-  }
-  if(!csvRows.length){alert('対応する銘柄が見つかりませんでした。');return;}
-  if(fxMatch)document.getElementById('fx-rate').value=fx;
-
-  const marketsInCsv=new Set(csvRows.map(r=>r.market));
-  const existingByCode={};
-  portfolio.forEach(r=>{existingByCode[r.code]=r;});
-
-  // CSVに無いが、CSVに出てきた市場区分に属する既存銘柄は削除（保有していないとみなす）
-  const kept=portfolio.filter(r=>!marketsInCsv.has(r.market));
-
-  let added=0,updated=0,restored=0;
-  const newRows=csvRows.map(c=>{
-    const old=existingByCode[c.code];
-    if(old&&marketsInCsv.has(old.market)){
-      updated++;
-      return {...old,name:c.name,shares:c.shares,buyPrice:c.buyPrice,mktPrice:c.mktPrice};
-    }
-    added++;
-    const r={id:nextId++,market:c.market,code:c.code,name:c.name,shares:c.shares,buyPrice:c.buyPrice,mktPrice:c.mktPrice,periods:defPeriods(c.market)};
-    if(divData[c.code]){applyDiv(r);restored++;}
-    return r;
-  });
-
-  portfolio=[...kept,...newRows];
-  save();render();
-  alert(`CSVを反映しました（新規${added}銘柄・更新${updated}銘柄）。CSVに無い銘柄は削除されました。${restored?`過去に入力した配当データを${restored}銘柄分復元しました。`:''}配当情報は各銘柄の詳細から入力してください。`);
-}
-
 /* ── Snapshot ── */
 const HK='divpf_v5_hist';
 function loadSnapshots(){try{return JSON.parse(localStorage.getItem(HK))||[];}catch(e){return[];}}
@@ -1159,55 +945,63 @@ function renderSnapshotList(){
   </table>`;
 }
 
-/* ── Bulk dividend update prompt ── */
-function bulkDivStockList(){
-  return portfolio.filter(r=>r.market==='jp'&&r.code)
-    .sort((a,b)=>a.code.localeCompare(b.code,'ja',{numeric:true}));
+/* ── Rakuten Securities update prompt ── */
+function rakutenStockList(){
+  return portfolio.filter(r=>r.code);
 }
 
-function buildBulkDivPromptText(){
-  const stocks=bulkDivStockList();
-  const listText=stocks.length
-    ?stocks.map((r,i)=>`${i+1}. ${r.code} ${r.name||'(銘柄名未設定)'}`).join('\n')
-    :'（対象銘柄がありません。日本株を追加してから実行してください）';
-  return `【一括配当更新の指示】
-このアプリ（配当ポートフォリオ管理）のタブと、IRBANK（https://irbank.net/）を行き来しながら、以下の日本株銘柄すべてについて直近の配当額を確認し、このアプリに入力してください。
+function buildRakutenPromptText(){
+  const jp=portfolio.filter(r=>r.market==='jp'&&r.code).sort((a,b)=>a.code.localeCompare(b.code,'ja',{numeric:true}));
+  const us=portfolio.filter(r=>r.market==='us'&&r.code).sort((a,b)=>a.code.localeCompare(b.code,'ja',{numeric:true}));
+  const jpList=jp.length?jp.map((r,i)=>`${i+1}. ${r.code} ${r.name||'(銘柄名未設定)'}`).join('\n'):'（対象銘柄なし）';
+  const usList=us.length?us.map((r,i)=>`${i+1}. ${r.code} ${r.name||'(銘柄名未設定)'}`).join('\n'):'（対象銘柄なし）';
+  return `【楽天証券から一括更新の指示】
+このアプリ（配当ポートフォリオ管理）のタブと、楽天証券のログイン後の画面を行き来しながら、株数・取得単価・現在値・為替レート・配当情報をすべて取得してこのアプリに入力してください。楽天証券には既にログイン済みの前提です。読み取りのみ行い、取引や口座設定の変更は一切行わないでください。
 
-■ 対象銘柄（${stocks.length}件・日本株のみ）
-${listText}
+■ 対象銘柄
+[日本株 ${jp.length}件]
+${jpList}
 
-■ 1銘柄ごとの手順
-1. https://irbank.net/【証券コード】/dividend を開き、「配当金の状況（円/株）」の表を確認する。
-2. 表の一番下（最新年度）の行から中間・期末の配当額（円）を読み取る。
-   - 区分（予想・修正・実績）は問わず、表の一番下にある最新の数字をそのまま使う（「-」の欄は無視し、直近の空欄でない数字を使う）。
-   - 中間・期末以外の配当回（四半期配当・記念配当・特別配当など）がある場合は、実態に合わせて配当回を判断する。
-3. このアプリのタブに切り替え、対象銘柄の銘柄名をクリックして詳細モーダルを開く。
-4. 「中間配当」「期末配当」（または該当する配当回）の配当額（円/1株）欄をクリックし、既存の値を選択してIRBANKで読み取った金額に上書き入力する。
-   - 配当回が足りない場合は「配当回を追加」ボタンで追加する。
-   - 入力欄は入力するだけで自動保存される（Enterキーはモーダルを閉じてしまうので、値を入力し終えてから使うこと）。
-5. 右上の✕ボタンでモーダルを閉じ、次の銘柄に進む。
+[米国株 ${us.length}件]
+${usList}
+
+■ 手順A：保有商品一覧から株数・単価・為替を取得
+1. 楽天証券サイトの「保有商品一覧」（国内株式）を開き、上記の日本株それぞれについて「保有数量」「取得単価」「現在値」を確認する。
+2. 「保有商品一覧」（米国株式・外国株式）を開き、上記の米国株それぞれについて「保有数量」「取得単価（USドル）」「現在値（USドル）」を確認する。同じ画面またはトップページでUSD/JPYの為替レートも確認する。
+3. このアプリのタブに切り替え、右上のUSD/JPY欄をクリックして為替レートを入力する。
+4. 各銘柄の行で、「株数」「取得単価」欄をクリックして直接編集し、上記で取得した数値を入力する（入力後Enterキーで確定）。現在値（実勢単価）欄も同様に入力する。日本株の金額は円、米国株の金額はドルで入力すること。
+
+■ 手順B：配当情報を取得
+1. 各銘柄の個別ページ（銘柄詳細）を開き、「配当・優待」タブを確認する。
+2. 日本株：「予想配当情報」の表から、直近の権利確定日ごとの1株配当額を確認する（中間・期末など内訳がある場合はそれぞれ記録。予想が出ていなければ「確定配当情報」の直近実績を使う）。
+3. 米国株：年間配当額（1株あたり、USドル）を確認する。
+4. このアプリのタブに戻り、対象銘柄の銘柄名をクリックして詳細モーダルを開く。
+5. 日本株：「中間配当」「期末配当」（またはそれに相当する配当回）の配当額欄に、それぞれ読み取った金額を入力する。配当回の数が実態と合わない場合は「配当回を追加」ボタンや削除ボタンで調整する。
+6. 米国株：「Q1」欄に、年間配当額をそのまま入力する（Q1に入力すると自動的にQ2〜Q4にも同じ額がコピーされる仕様）。四半期ごとの金額が分かる場合はそちらを優先して各欄に入力する。
+7. 入力欄はクリックして値を入力するだけで自動保存される（Enterキーはモーダルを閉じてしまうため、入力し終えてから使うこと）。
+8. 右上の✕ボタンでモーダルを閉じ、次の銘柄に進む。
 
 ■ 注意事項
-- 金額の単位は「円」（米ドルではない）。
-- 株式分割があった銘柄も、IRBANKの表に表示されている金額（分割後）をそのまま使う。
-- 該当ページが存在しない、または配当データがない銘柄はスキップする。
-- IRBANKへのアクセスは1銘柄ずつ順番に行い、極端に高速で連続アクセスしない。
+- まだこのアプリに登録されていない銘柄があれば、「日本株」「米国株」ボタンで行を追加してからコードを入力する。
+- 該当データが見つからない銘柄はスキップし、最後に一覧で報告する。
 - 全銘柄の処理が終わったら、更新できた銘柄数と、スキップした銘柄があればその理由を報告すること。`;
 }
 
-function openBulkDivModal(){
-  const stocks=bulkDivStockList();
-  document.getElementById('bulkdiv-count').textContent=`対象：日本株 ${stocks.length}件`;
-  document.getElementById('bulkdiv-textarea').value=buildBulkDivPromptText();
-  document.getElementById('bulkdiv-status').textContent='';
-  document.getElementById('bulkdiv-overlay').classList.add('open');
+function openRakutenModal(){
+  const stocks=rakutenStockList();
+  const jpN=stocks.filter(r=>r.market==='jp').length;
+  const usN=stocks.filter(r=>r.market==='us').length;
+  document.getElementById('rakuten-count').textContent=`対象：日本株 ${jpN}件・米国株 ${usN}件`;
+  document.getElementById('rakuten-textarea').value=buildRakutenPromptText();
+  document.getElementById('rakuten-status').textContent='';
+  document.getElementById('rakuten-overlay').classList.add('open');
 }
-function closeBulkDivModal(){document.getElementById('bulkdiv-overlay').classList.remove('open');}
-function closeBulkDivOut(e){if(e.target===document.getElementById('bulkdiv-overlay'))closeBulkDivModal();}
+function closeRakutenModal(){document.getElementById('rakuten-overlay').classList.remove('open');}
+function closeRakutenOut(e){if(e.target===document.getElementById('rakuten-overlay'))closeRakutenModal();}
 
-async function copyBulkDivPrompt(){
-  const ta=document.getElementById('bulkdiv-textarea');
-  const status=document.getElementById('bulkdiv-status');
+async function copyRakutenPrompt(){
+  const ta=document.getElementById('rakuten-textarea');
+  const status=document.getElementById('rakuten-status');
   try{
     await navigator.clipboard.writeText(ta.value);
     status.textContent='コピーしました';
@@ -1226,7 +1020,7 @@ function resetAllData(){
   portfolio=[];nextId=1;
   document.getElementById('fx-rate').value=155;
   save();render();
-  alert('保有データをリセットしました。楽天証券CSVを読み込んで復元してください（配当データは銘柄コードが一致すれば自動的に復元されます）。');
+  alert('保有データをリセットしました。銘柄を追加してから「楽天証券から更新」でデータを再取得してください（配当データは銘柄コードが一致すれば自動的に復元されます）。');
 }
 
 document.getElementById('fx-rate').addEventListener('input',()=>{render();save();});
@@ -1235,4 +1029,3 @@ loadDiv();load();render();
 
 </body>
 </html>
-
