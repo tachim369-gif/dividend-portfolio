@@ -233,17 +233,13 @@ input[type="number"]{-moz-appearance:textfield;}
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a5 5 0 019-3"></path><path d="M13 8a5 5 0 01-9 3"></path><polyline points="12,2 12,5 9,5"></polyline><polyline points="4,14 4,11 7,11"></polyline></svg>
       <span id="bulkdiv-btn-label">一括配当更新</span>
     </button>
-    <button class="btn btn-danger" style="margin-left:auto;" onclick="resetAllData()">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"></polyline><path d="M1,1 A7,7 0 1,1 0,8"></path></svg>
-      データリセット
-    </button>
   </div>
 
   <div class="table-wrap" id="card-jp" style="margin-bottom:24px;">
     <div class="section-card-hd jp">🇯🇵 日本株</div>
     <table style="table-layout:fixed;">
       <colgroup>
-        <col style="width:60px;"><col><col style="width:40px;"><col style="width:78px;"><col style="width:78px;"><col style="width:85px;"><col style="width:85px;"><col style="width:78px;"><col style="width:78px;"><col style="width:76px;"><col style="width:76px;"><col style="width:85px;"><col style="width:32px;">
+        <col style="width:60px;"><col><col style="width:40px;"><col style="width:78px;"><col style="width:78px;"><col style="width:85px;"><col style="width:85px;"><col style="width:78px;"><col style="width:78px;"><col style="width:76px;"><col style="width:76px;"><col style="width:85px;">
       </colgroup>
       <tbody id="portfolio-body-jp"></tbody>
     </table>
@@ -252,7 +248,7 @@ input[type="number"]{-moz-appearance:textfield;}
     <div class="section-card-hd us">🇺🇸 米国株</div>
     <table style="table-layout:fixed;">
       <colgroup>
-        <col style="width:60px;"><col><col style="width:40px;"><col style="width:78px;"><col style="width:78px;"><col style="width:85px;"><col style="width:85px;"><col style="width:78px;"><col style="width:78px;"><col style="width:76px;"><col style="width:76px;"><col style="width:85px;"><col style="width:32px;">
+        <col style="width:60px;"><col><col style="width:40px;"><col style="width:78px;"><col style="width:78px;"><col style="width:85px;"><col style="width:85px;"><col style="width:78px;"><col style="width:78px;"><col style="width:76px;"><col style="width:76px;"><col style="width:85px;">
       </colgroup>
       <tbody id="portfolio-body-us"></tbody>
     </table>
@@ -261,7 +257,7 @@ input[type="number"]{-moz-appearance:textfield;}
     <div class="section-card-hd total">📊 総合計</div>
     <table style="table-layout:fixed;">
       <colgroup>
-        <col style="width:60px;"><col><col style="width:40px;"><col style="width:78px;"><col style="width:78px;"><col style="width:85px;"><col style="width:85px;"><col style="width:78px;"><col style="width:78px;"><col style="width:76px;"><col style="width:76px;"><col style="width:85px;"><col style="width:32px;">
+        <col style="width:60px;"><col><col style="width:40px;"><col style="width:78px;"><col style="width:78px;"><col style="width:85px;"><col style="width:85px;"><col style="width:78px;"><col style="width:78px;"><col style="width:76px;"><col style="width:76px;"><col style="width:85px;">
       </colgroup>
       <thead><tr style="background:var(--surface2);">
         <th style="text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" colspan="5"></th>
@@ -272,7 +268,6 @@ input[type="number"]{-moz-appearance:textfield;}
         <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得利回り</th>
         <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">実勢利回り</th>
         <th style="text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当計(¥)</th>
-        <th style="border-bottom:1px solid var(--border);"></th>
       </tr></thead>
       <tbody id="portfolio-body-total"></tbody>
     </table>
@@ -280,6 +275,12 @@ input[type="number"]{-moz-appearance:textfield;}
   <div class="footer-note">
     ※ 利回り(買)=購入単価基準、利回り(現)=実勢単価基準。実勢単価は「株価更新」ボタンで取得。<br>
     ※ 「詳細 ↗」で配当スケジュール・過去10年履歴を管理できます。データはブラウザに保存されます。
+  </div>
+  <div style="margin-top:24px;padding-top:12px;border-top:1px solid var(--border);text-align:right;">
+    <button class="btn btn-danger" style="font-size:12px;padding:5px 10px;" onclick="resetAllData()">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"></polyline><path d="M1,1 A7,7 0 1,1 0,8"></path></svg>
+      データリセット
+    </button>
   </div>
 </div>
 
@@ -511,6 +512,9 @@ function renderPortfolio(){
       <td style="text-align:left;"><input type="text" class="left" value="${r.code||''}" placeholder="コード" onchange="updRow('portfolio',${r.id},'code',this.value)" onfocus="this.select()"></td>
       <td style="text-align:left;">
         <div class="name-cell-wrap" id="name-wrap-${r.id}">
+          <a class="ir-link-btn" href="${r.market==='jp'?`https://irbank.net/${r.code}`:`https://finance.yahoo.com/quote/${r.code}/`}" target="_blank" rel="noopener" title="銘柄ページを開く">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>
+          </a>
           <button class="name-btn" id="name-btn-${r.id}" onclick="handleNameClick(${r.id})" ondblclick="event.stopPropagation();handleNameDblClick('portfolio',${r.id})" title="クリック:詳細 / ダブルクリック:名前編集">${r.name||'—'}</button>
           ${r.name?'':`<button class="name-edit-btn" onclick="editName('portfolio',${r.id})" title="銘柄名を編集">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z"/></svg>
@@ -527,11 +531,6 @@ function renderPortfolio(){
       <td id="ybuy-${r.id}" style="${nc}">${yb!==null?yb.toFixed(2)+'%':'—'}</td>
       <td class="hm" id="ymkt-${r.id}" style="${nc}">${ym!==null?ym.toFixed(2)+'%':'—'}</td>
       <td id="ann-${r.id}" style="${nc}">${fmtJpy(ann)}</td>
-      <td style="text-align:center;">
-        <a class="ir-link-btn" href="${r.market==='jp'?`https://irbank.net/${r.code}`:`https://finance.yahoo.com/quote/${r.code}/`}" target="_blank" rel="noopener" title="銘柄ページを開く">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>
-        </a>
-      </td>
     </tr>`;
   };
   const byCode=(a,b)=>{
@@ -555,7 +554,6 @@ function renderPortfolio(){
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得利回り</th>
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢利回り</th>
     <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当計(¥)</th>
-    <th style="width:32px;border-bottom:1px solid var(--border);"></th>
   </tr>`;
   const colHdUs=`<tr style="background:var(--surface2);">
     <th style="width:76px;text-align:left;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">コード</th>
@@ -570,7 +568,6 @@ function renderPortfolio(){
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">取得利回り</th>
     <th style="width:76px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢利回り</th>
     <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);">配当計(¥)</th>
-    <th style="width:32px;border-bottom:1px solid var(--border);"></th>
   </tr>`;
   const totalRow=(rows,market)=>{
     const gainSum=rows.reduce((s,r)=>{const g=gainJpy(r);return g!==null?s+g:s;},0);
@@ -592,15 +589,14 @@ function renderPortfolio(){
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);">${yldCostSum!==null?yldCostSum.toFixed(2)+'%':'—'}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);" class="hm">${yldMktSum!==null?yldMktSum.toFixed(2)+'%':'—'}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text);">${fmtJpy(annSum)}</td>
-      <td></td>
     </tr>`;
   };
   tbJp.innerHTML=jpRows.length
     ?colHdJp+jpRows.map(mkRow).join('')+totalRow(jpRows,'jp')
-    :'<tr><td colspan="13" class="empty-state">日本株のデータがありません。「楽天証券CSV」を読み込んでください</td></tr>';
+    :'<tr><td colspan="12" class="empty-state">日本株のデータがありません。「楽天証券CSV」を読み込んでください</td></tr>';
   tbUs.innerHTML=usRows.length
     ?colHdUs+usRows.map(mkRow).join('')+totalRow(usRows,'us')
-    :'<tr><td colspan="13" class="empty-state">米国株のデータがありません。「楽天証券CSV」を読み込んでください</td></tr>';
+    :'<tr><td colspan="12" class="empty-state">米国株のデータがありません。「楽天証券CSV」を読み込んでください</td></tr>';
 
     const allRows=[...jpRows,...usRows];
   const tbTotal=document.getElementById('portfolio-body-total');
@@ -622,7 +618,6 @@ function renderPortfolio(){
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);color:var(--text2);">${yldCost!==null?yldCost.toFixed(2)+'%':'—'}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);color:var(--text2);">${yldMkt!==null?yldMkt.toFixed(2)+'%':'—'}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);color:var(--text);">${fmtJpy(annAll)}</td>
-      <td></td>
     </tr>`;
   }
   updateTotals();
