@@ -27,7 +27,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .h-right{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
 .fx-label{font-size:12px;color:var(--text2);}
 .fx-box{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);}
-.fx-input{font-family:var(--mono);font-size:13px;width:44px;padding:0;border:none;background:transparent;color:var(--text);text-align:left;}
+.fx-input{font-family:var(--mono);font-size:13px;width:44px;padding:0;border:none;background:transparent;color:var(--text);text-align:left;box-sizing:content-box;}
 .fx-input:focus{outline:none;}
 .idx-val{font-family:var(--mono);font-size:13px;color:var(--text);}
 .price-update-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);cursor:pointer;transition:all .15s;white-space:nowrap;}
@@ -190,6 +190,7 @@ input[type="number"]{-moz-appearance:textfield;}
     <span class="fx-box">
       <span class="fx-label">USD/JPY</span>
       <input type="number" class="fx-input" id="fx-rate" value="155" min="100" max="300" step="0.1">
+      <span id="fx-measure" style="position:absolute;visibility:hidden;white-space:pre;font-family:var(--mono);font-size:13px;"></span>
       <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
     </span>
     <button class="price-update-btn" id="price-btn" onclick="updateAllPrices()" style="flex-shrink:0;white-space:nowrap;width:210px;justify-content:center;">
@@ -408,6 +409,7 @@ function load(){
       if(d.idxN225) document.getElementById('idx-n225').textContent=d.idxN225;
       if(d.idxDji) document.getElementById('idx-dji').textContent=d.idxDji;
       if(d.idxSp500) document.getElementById('idx-sp500').textContent=d.idxSp500;
+      sizeFxInput();
       return;
     }
   }catch(e){}
@@ -430,8 +432,16 @@ function load(){
      history:[{year:y-4,div:0.82,note:''},{year:y-3,div:0.90,note:''},{year:y-2,div:0.94,note:''},{year:y-1,div:0.97,note:''},{year:y,div:1.00,note:'予想'}]},
   ];
   save();
+  sizeFxInput();
 }
 
+function sizeFxInput(){
+  const inp=document.getElementById('fx-rate');
+  const meas=document.getElementById('fx-measure');
+  if(!inp||!meas)return;
+  meas.textContent=inp.value||'0';
+  inp.style.width=(meas.offsetWidth+2)+'px';
+}
 function uid(){return Math.random().toString(36).slice(2,8);}
 function getFx(){return parseFloat(document.getElementById('fx-rate').value)||155;}
 function fmtNum(v){return Math.round(v).toLocaleString('ja-JP');}
@@ -755,6 +765,7 @@ async function updateAllPrices(){
     if(prices['USDJPY']){
       const fxRate=Math.round(parseFloat(prices['USDJPY'])*100)/100;
       document.getElementById('fx-rate').value=fxRate;
+      sizeFxInput();
     }
     // 主要指数反映
     if(prices['N225']!=null)document.getElementById('idx-n225').textContent=fmtNum(prices['N225']);
@@ -1123,8 +1134,9 @@ function resetAllData(){
   alert('保有データをリセットしました。楽天証券CSVを読み込んで復元してください（配当データは銘柄コードが一致すれば自動的に復元されます）。');
 }
 
-document.getElementById('fx-rate').addEventListener('input',()=>{render();save();});
+document.getElementById('fx-rate').addEventListener('input',()=>{sizeFxInput();render();save();});
 loadDiv();load();render();
+sizeFxInput();
 updateAllPrices();
 </script>
 
