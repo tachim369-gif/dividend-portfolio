@@ -27,7 +27,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .h-right{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
 .fx-label{font-size:12px;color:var(--text2);}
 .fx-box{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);}
-.fx-input{font-family:var(--mono);font-size:13px;width:56px;padding:0;border:none;background:transparent;color:var(--text);text-align:right;}
+.fx-input{font-family:var(--mono);font-size:13px;width:44px;padding:0;border:none;background:transparent;color:var(--text);text-align:left;}
 .fx-input:focus{outline:none;}
 .idx-val{font-family:var(--mono);font-size:13px;color:var(--text);}
 .price-update-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);cursor:pointer;transition:all .15s;white-space:nowrap;}
@@ -375,7 +375,10 @@ let portfolio=[],nextId=1,curId=null,curList=null,divData={};
 /* ── Storage ── */
 function save(){
   const fxRate=document.getElementById('fx-rate').value;
-  localStorage.setItem(SK,JSON.stringify({portfolio,nextId,fxRate}));
+  const idxN225=document.getElementById('idx-n225').textContent;
+  const idxDji=document.getElementById('idx-dji').textContent;
+  const idxSp500=document.getElementById('idx-sp500').textContent;
+  localStorage.setItem(SK,JSON.stringify({portfolio,nextId,fxRate,idxN225,idxDji,idxSp500}));
 }
 function saveDiv(){
   try{localStorage.setItem(DK,JSON.stringify(divData));}catch(e){}
@@ -402,6 +405,9 @@ function load(){
       portfolio=d.portfolio||[];
       nextId=d.nextId||1;
       if(d.fxRate) document.getElementById('fx-rate').value=d.fxRate;
+      if(d.idxN225) document.getElementById('idx-n225').textContent=d.idxN225;
+      if(d.idxDji) document.getElementById('idx-dji').textContent=d.idxDji;
+      if(d.idxSp500) document.getElementById('idx-sp500').textContent=d.idxSp500;
       return;
     }
   }catch(e){}
