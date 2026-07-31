@@ -29,7 +29,7 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .fx-box{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);}
 .fx-input{font-family:var(--mono);font-size:13px;width:56px;padding:0;border:none;background:transparent;color:var(--text);text-align:right;}
 .fx-input:focus{outline:none;}
-.idx-item{display:inline-block;font-size:12px;font-family:var(--mono);white-space:nowrap;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);color:var(--text);}
+.idx-val{font-family:var(--mono);font-size:13px;color:var(--text);}
 .price-update-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);cursor:pointer;transition:all .15s;white-space:nowrap;}
 .price-update-btn:hover{background:var(--surface);border-color:var(--border2);color:var(--text);}
 .price-update-btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -172,9 +172,21 @@ input[type="number"]{-moz-appearance:textfield;}
 <header>
   <div class="h-title"><svg class="h-icon" width="22" height="22" viewBox="0 0 16 16"><rect x="0" y="0" width="16" height="16" rx="4" fill="#1a1a1a"></rect><rect x="2" y="10" width="1.8" height="3" rx="0.5" fill="#1f5c38"></rect><rect x="5.4" y="8" width="1.8" height="5" rx="0.5" fill="#2c8050"></rect><rect x="8.8" y="5.5" width="1.8" height="7.5" rx="0.5" fill="#3fae6c"></rect><rect x="12.2" y="3" width="1.8" height="10" rx="0.5" fill="#5fe28c"></rect></svg>配当ポートフォリオ</div>
   <div class="h-right">
-    <span class="idx-item hm" id="idx-n225">日経平均 —</span>
-    <span class="idx-item hm" id="idx-dji">NYダウ —</span>
-    <span class="idx-item hm" id="idx-sp500">S&amp;P500 —</span>
+    <span class="fx-box hm">
+      <span class="fx-label">日経平均</span>
+      <span class="idx-val" id="idx-n225">—</span>
+      <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
+    </span>
+    <span class="fx-box hm">
+      <span class="fx-label">NYダウ</span>
+      <span class="idx-val" id="idx-dji">—</span>
+      <span class="fx-label" style="font-family:var(--mono);font-size:13px;">$</span>
+    </span>
+    <span class="fx-box hm">
+      <span class="fx-label">S&amp;P500</span>
+      <span class="idx-val" id="idx-sp500">—</span>
+      <span class="fx-label" style="font-family:var(--mono);font-size:13px;">$</span>
+    </span>
     <span class="fx-box">
       <span class="fx-label">USD/JPY</span>
       <input type="number" class="fx-input" id="fx-rate" value="155" min="100" max="300" step="0.1">
@@ -739,9 +751,9 @@ async function updateAllPrices(){
       document.getElementById('fx-rate').value=fxRate;
     }
     // 主要指数反映
-    if(prices['N225']!=null)document.getElementById('idx-n225').textContent='日経平均 '+fmtNum(prices['N225']);
-    if(prices['DJI']!=null)document.getElementById('idx-dji').textContent='NYダウ '+fmtNum(prices['DJI']);
-    if(prices['SP500']!=null)document.getElementById('idx-sp500').textContent='S&P500 '+fmtNum(prices['SP500']);
+    if(prices['N225']!=null)document.getElementById('idx-n225').textContent=fmtNum(prices['N225']);
+    if(prices['DJI']!=null)document.getElementById('idx-dji').textContent=fmtNum(prices['DJI']);
+    if(prices['SP500']!=null)document.getElementById('idx-sp500').textContent=fmtNum(prices['SP500']);
 
     let updated=0;
     allRows.forEach(r=>{
