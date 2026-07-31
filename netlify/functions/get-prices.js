@@ -29,6 +29,30 @@ exports.handler = async function(event) {
       console.warn('FX fetch failed:', e.message);
     }
 
+    // 主要指数取得（日経平均・NYダウ・S&P500）
+    const indices = [
+      { key: 'N225', symbol: '^N225' },
+      { key: 'DJI', symbol: '^DJI' },
+      { key: 'SP500', symbol: '^GSPC' }
+    ];
+    for (const { key, symbol } of indices) {
+      try {
+        const idxRes = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': '*/*',
+            'Referer': 'https://finance.yahoo.com'
+          }
+        });
+        const idxData = await idxRes.json();
+        const meta = idxData?.chart?.result?.[0]?.meta;
+        const val = meta?.regularMarketPrice || meta?.previousClose;
+        if (val) prices[key] = val;
+      } catch(e) {
+        console.warn(`Index fetch failed (${key}):`, e.message);
+      }
+    }
+
     // 株価取得
     for (const { code, market } of (codes || [])) {
       try {
