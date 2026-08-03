@@ -86,6 +86,10 @@ td input.left{text-align:left;font-family:var(--sans);}
 td input:focus{outline:none;border-bottom-color:var(--border2);}
 .name-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--text);text-align:left;padding:4px 10px;transition:all .15s;text-decoration:none;display:block;width:100%;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .name-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--accent2);}
+.name-btn.div-up{border-color:#f0b0b0;background:#fdeaea;color:var(--gain-up);}
+.name-btn.div-up:hover{background:#fbdada;}
+.name-btn.div-down{border-color:#b0c8f0;background:#eaf1fd;color:var(--gain-down);}
+.name-btn.div-down:hover{background:#dcebfb;}
 .name-cell-wrap{display:flex;align-items:center;gap:4px;min-width:0;}
 .name-edit-btn{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:none;background:none;color:var(--text3);cursor:pointer;border-radius:6px;transition:all .15s;}
 .name-edit-btn:hover{background:var(--surface2);color:var(--text2);}
@@ -189,7 +193,7 @@ input[type="number"]{-moz-appearance:textfield;}
     </span>
     <span class="fx-box">
       <span class="fx-label">USD/JPY</span>
-      <input type="number" class="fx-input" id="fx-rate" value="155" min="100" max="300" step="0.1">
+      <input type="number" class="fx-input" id="fx-rate" value="155.00" min="100" max="300" step="0.1">
       <span id="fx-measure" style="position:absolute;visibility:hidden;white-space:pre;font-family:var(--mono);font-size:13px;"></span>
       <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
     </span>
@@ -197,6 +201,11 @@ input[type="number"]{-moz-appearance:textfield;}
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,1 4,1"></polyline><path d="M1,1 A7,7 0 1,1 0,8"></path></svg>
       <span id="price-btn-label">株価更新</span>
       <span class="last-updated" id="last-updated">0/0 00:00</span>
+    </button>
+    <button class="price-update-btn" id="bulkdiv-btn" onclick="updateAllDividends()" style="flex-shrink:0;white-space:nowrap;width:210px;justify-content:center;">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a5 5 0 019-3"></path><path d="M13 8a5 5 0 01-9 3"></path><polyline points="12,2 12,5 9,5"></polyline><polyline points="4,14 4,11 7,11"></polyline></svg>
+      <span id="bulkdiv-btn-label">配当更新</span>
+      <span class="last-updated" id="bulkdiv-last-updated">0/0 00:00</span>
     </button>
   </div>
 </header>
@@ -248,10 +257,6 @@ input[type="number"]{-moz-appearance:textfield;}
     <button class="btn" style="border-color:#c8b4e0;color:#6a3d9a;background:#f3eef9;" onclick="openSnapshotModal()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="12" height="12" rx="1"></rect><line x1="5" y1="6" x2="11" y2="6"></line><line x1="5" y1="9" x2="11" y2="9"></line><line x1="5" y1="12" x2="8" y2="12"></line></svg>
       履歴
-    </button>
-    <button class="btn" id="bulkdiv-btn" style="border-color:#b8d4f0;color:var(--accent2);background:var(--accent2-bg);" onclick="updateAllDividends()">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a5 5 0 019-3"></path><path d="M13 8a5 5 0 01-9 3"></path><polyline points="12,2 12,5 9,5"></polyline><polyline points="4,14 4,11 7,11"></polyline></svg>
-      <span id="bulkdiv-btn-label">一括配当更新</span>
     </button>
   </div>
 
@@ -379,7 +384,9 @@ function save(){
   const idxN225=document.getElementById('idx-n225').textContent;
   const idxDji=document.getElementById('idx-dji').textContent;
   const idxSp500=document.getElementById('idx-sp500').textContent;
-  localStorage.setItem(SK,JSON.stringify({portfolio,nextId,fxRate,idxN225,idxDji,idxSp500}));
+  const divUpdatedEl=document.getElementById('bulkdiv-last-updated');
+  const divUpdated=divUpdatedEl?divUpdatedEl.textContent:'';
+  localStorage.setItem(SK,JSON.stringify({portfolio,nextId,fxRate,idxN225,idxDji,idxSp500,divUpdated}));
 }
 function saveDiv(){
   try{localStorage.setItem(DK,JSON.stringify(divData));}catch(e){}
@@ -405,10 +412,14 @@ function load(){
     if(d){
       portfolio=d.portfolio||[];
       nextId=d.nextId||1;
-      if(d.fxRate) document.getElementById('fx-rate').value=d.fxRate;
+      if(d.fxRate) document.getElementById('fx-rate').value=parseFloat(d.fxRate).toFixed(2);
       if(d.idxN225) document.getElementById('idx-n225').textContent=d.idxN225;
       if(d.idxDji) document.getElementById('idx-dji').textContent=d.idxDji;
       if(d.idxSp500) document.getElementById('idx-sp500').textContent=d.idxSp500;
+      if(d.divUpdated){
+        const el=document.getElementById('bulkdiv-last-updated');
+        if(el)el.textContent=d.divUpdated;
+      }
       sizeFxInput();
       return;
     }
@@ -550,7 +561,7 @@ function renderPortfolio(){
           <a class="ir-link-btn" href="${r.market==='jp'?`https://irbank.net/${r.code}`:`https://finance.yahoo.com/quote/${r.code}/`}" target="_blank" rel="noopener" title="銘柄ページを開く">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/><path d="M10 2h4v4"/><line x1="14" y1="2" x2="7" y2="9"/></svg>
           </a>
-          <button class="name-btn" id="name-btn-${r.id}" onclick="handleNameClick(${r.id})" ondblclick="event.stopPropagation();handleNameDblClick('portfolio',${r.id})" title="クリック:詳細 / ダブルクリック:名前編集">${r.name||'—'}</button>
+          <button class="name-btn${r.divChange==='up'?' div-up':r.divChange==='down'?' div-down':''}" id="name-btn-${r.id}" onclick="handleNameClick(${r.id})" ondblclick="event.stopPropagation();handleNameDblClick('portfolio',${r.id})" title="クリック:詳細 / ダブルクリック:名前編集">${r.name||'—'}</button>
           ${r.name?'':`<button class="name-edit-btn" onclick="editName('portfolio',${r.id})" title="銘柄名を編集">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z"/></svg>
           </button>`}
@@ -764,7 +775,7 @@ async function updateAllPrices(){
     // 為替レート自動反映
     if(prices['USDJPY']){
       const fxRate=Math.round(parseFloat(prices['USDJPY'])*100)/100;
-      document.getElementById('fx-rate').value=fxRate;
+      document.getElementById('fx-rate').value=fxRate.toFixed(2);
       sizeFxInput();
     }
     // 主要指数反映
@@ -803,18 +814,18 @@ async function fetchDividendsBatch(codes){
 
 async function updateAllDividends(){
   const btn=document.getElementById('bulkdiv-btn');
-  const label=document.getElementById('bulkdiv-btn-label');
+  const lastUpdated=document.getElementById('bulkdiv-last-updated');
   const rows=portfolio.filter(r=>r.code);
   if(!rows.length){alert('コード登録済みの銘柄がありません。');return;}
   btn.disabled=true;
-  label.textContent='配当取得中...';
+  lastUpdated.textContent='取得中...';
   try{
     const maxRounds=4;
     let pending=rows.map(r=>({code:r.code,market:r.market}));
     const allDividends={};
     const allErrors={};
     for(let round=1;round<=maxRounds&&pending.length;round++){
-      label.textContent=round===1?'配当取得中...':`再試行中(${round-1}/${maxRounds-1})...`;
+      lastUpdated.textContent=round===1?'取得中...':`再試行中(${round-1}/${maxRounds-1})...`;
       const {dividends,errors}=await fetchDividendsBatch(pending);
       Object.assign(allDividends,dividends);
       Object.assign(allErrors,errors);
@@ -829,19 +840,22 @@ async function updateAllDividends(){
     rows.forEach(r=>{
       const v=allDividends[r.code];
       if(v!=null){
+        const prevAnnual=annualDiv(r);
         const noDiv=v===0;
         r.periods=[{id:uid(),label:noDiv?'年間配当（自動取得・配当なし）':'年間配当（自動取得）',div:v,exDate:'',payDate:''}];
         syncDiv(r);
         updated++;
+        if(prevAnnual>0&&v!==prevAnnual) r.divChange=(v<prevAnnual?'down':'up');
+        else r.divChange=null;
       }else{
         const reason=allErrors[r.code]?`（${allErrors[r.code]}）`:'';
         const line=`${r.code} ${r.name||''}`.trim()+reason;
         (r.market==='us'?skippedUs:skippedJp).push(line);
       }
     });
-    save();render();
     const now=new Date();
-    label.textContent=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 更新済`;
+    lastUpdated.textContent=`${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+    save();render();
     const skipped=skippedJp.length+skippedUs.length;
     if(skipped){
       let msg=`${updated}銘柄の配当を自動更新しました。\n\n${maxRounds}回試しても取得できなかった銘柄（${skipped}件）:\n`;
@@ -852,7 +866,7 @@ async function updateAllDividends(){
     }
   }catch(e){
     console.error(e);
-    label.textContent='取得失敗';
+    lastUpdated.textContent='取得失敗';
     alert('配当データの取得に失敗しました。しばらくしてから再度お試しください。');
   }
   btn.disabled=false;
@@ -863,6 +877,12 @@ function openModal(listName,id){
   curList=listName;curId=id;
   const list=getList(listName);
   const r=list.find(x=>x.id===id);if(!r)return;
+  if(r.divChange){
+    r.divChange=null;
+    save();
+    const nb=document.getElementById('name-btn-'+id);
+    if(nb)nb.classList.remove('div-up','div-down');
+  }
   document.getElementById('m-title').textContent=r.name||r.code||'銘柄詳細';
   document.getElementById('m-sub').textContent=(r.market==='jp'?'東証　':'NYSE/NASDAQ　')+(r.code||'');
   document.getElementById('m-settlement').value=r.settlementMonth||'';
@@ -921,7 +941,7 @@ function renderPeriods(r){
       </div>
       <div class="period-fields">
         <div class="pf"><label>配当額（${unit}/1株）</label>
-          <input class="period-div-input" id="pdiv-${p.id}" type="number" value="${p.div||''}" step="${step}" min="0" oninput="updPeriod('${p.id}','div',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();closeModal();}"></div>
+          <input class="period-div-input" id="pdiv-${p.id}" type="number" value="${r.market==='us'?Number(p.div).toFixed(2):p.div}" step="${step}" min="0" oninput="updPeriod('${p.id}','div',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();closeModal();}"></div>
       </div>
     </div>`).join('');
   renderAnnualTotal(r);
@@ -946,7 +966,7 @@ function updPeriod(pid,field,val){
       for(let i=idx+1;i<r.periods.length;i++){
         r.periods[i].div=p.div;
         const inp=document.getElementById('pdiv-'+r.periods[i].id);
-        if(inp)inp.value=p.div||'';
+        if(inp)inp.value=p.div.toFixed(2);
       }
     }
   }else p[field]=val;
