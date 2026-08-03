@@ -230,17 +230,20 @@ input[type="number"]{-moz-appearance:textfield;}
       <div class="sum-val" id="us-annual-after">—</div>
       <div class="sum-sub-tax"><span id="us-annual">—</span>（税引前）</div>
     </div>
-    <div class="sum-card" style="background:#fef6e4;border-color:#e0d4b8;">
+    <div class="sum-card" style="background:#f0eef8;border-color:#c8b4e0;">
       <div class="sum-lbl">含み損益（¥）</div>
       <div class="sum-val up" id="total-gain">—</div>
+      <div class="sum-sub-tax"><span id="total-gain-pre">—</span>（税引前）</div>
     </div>
     <div class="sum-card" style="background:#f0eef8;border-color:#c8b4e0;">
-      <div class="sum-lbl">取得利回り（税引後）</div>
+      <div class="sum-lbl">取得利回り</div>
       <div class="sum-val" id="yield-cost">—</div>
+      <div class="sum-sub-tax"><span id="yield-cost-pre">—</span>（税引前）</div>
     </div>
     <div class="sum-card" style="background:#f0eef8;border-color:#c8b4e0;">
-      <div class="sum-lbl">実勢利回り（税引後）</div>
+      <div class="sum-lbl">実勢利回り</div>
       <div class="sum-val" id="yield-mkt">—</div>
+      <div class="sum-sub-tax"><span id="yield-mkt-pre">—</span>（税引前）</div>
     </div>
   </div>
 
@@ -250,11 +253,11 @@ input[type="number"]{-moz-appearance:textfield;}
       楽天証券CSV
     </button>
     <input type="file" id="csv-file" class="csv-input" accept=".csv" onchange="handleCSV(this)">
-    <button class="btn" style="border-color:#c8b4e0;color:#6a3d9a;background:#f3eef9;" onclick="saveSnapshot()">
+    <button class="btn btn-csv" onclick="saveSnapshot()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6"></circle><line x1="8" y1="5" x2="8" y2="8"></line><line x1="8" y1="8" x2="10.5" y2="10.5"></line></svg>
       記録
     </button>
-    <button class="btn" style="border-color:#c8b4e0;color:#6a3d9a;background:#f3eef9;" onclick="openSnapshotModal()">
+    <button class="btn btn-csv" onclick="openSnapshotModal()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="12" height="12" rx="1"></rect><line x1="5" y1="6" x2="11" y2="6"></line><line x1="5" y1="9" x2="11" y2="9"></line><line x1="5" y1="12" x2="8" y2="12"></line></svg>
       履歴
     </button>
@@ -509,14 +512,25 @@ function updateTotals(){
   document.getElementById('jp-annual-after').textContent=fmtJpy(Math.round(jp*(1-0.20315)));
   document.getElementById('us-annual-after').textContent=fmtJpy(Math.round(us*(1-0.20315)));
   const gainEl=document.getElementById('total-gain');
+  const gainPreEl=document.getElementById('total-gain-pre');
   if(gainN>0){
-    gainEl.innerHTML=fmtGainHtml(gain);
+    const gainAfter=gain>=0?gain*(1-0.20315):gain;
+    gainEl.innerHTML=fmtGainHtml(gainAfter);
     gainEl.className='sum-val '+(gain>=0?'up':'down');
-  }else{gainEl.textContent='—';gainEl.className='sum-val';}
+    if(gainPreEl)gainPreEl.textContent=(gain<0?'-':'')+fmtJpy(Math.abs(gain));
+  }else{
+    gainEl.textContent='—';gainEl.className='sum-val';
+    if(gainPreEl)gainPreEl.textContent='—';
+  }
   const yc=document.getElementById('yield-cost');
   const ym=document.getElementById('yield-mkt');
   if(yc)yc.textContent=totalCost>0?(afterTax/totalCost*100).toFixed(2)+'%':'—';
   if(ym)ym.textContent=totalMkt>0?(afterTax/totalMkt*100).toFixed(2)+'%':'—';
+  const ycPre=document.getElementById('yield-cost-pre');
+  const ymPre=document.getElementById('yield-mkt-pre');
+  const preTax=jp+us;
+  if(ycPre)ycPre.textContent=totalCost>0?(preTax/totalCost*100).toFixed(2)+'%':'—';
+  if(ymPre)ymPre.textContent=totalMkt>0?(preTax/totalMkt*100).toFixed(2)+'%':'—';
 }
 
 /* ── Click-to-edit for formatted cells ── */
