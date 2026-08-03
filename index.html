@@ -143,15 +143,6 @@ td input:focus{outline:none;border-bottom-color:var(--border2);}
 .pf input:focus{outline:none;border-color:var(--border2);}
 input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 input[type="number"]{-moz-appearance:textfield;}
-.add-period-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--border2);border-radius:var(--r);background:none;color:var(--text3);font-size:13px;font-family:var(--sans);cursor:pointer;width:100%;justify-content:center;transition:all .15s;margin-top:6px;}
-.add-period-btn:hover{background:var(--surface2);color:var(--text2);}
-.annual-total{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;margin-top:10px;}
-.annual-total .annual-total-hd{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.annual-total .annual-total-label{flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
-.annual-total .annual-total-spacer{width:21px;height:21px;flex-shrink:0;}
-.annual-total .annual-total-sub{font-size:11px;color:var(--text3);margin-bottom:3px;}
-.annual-total .annual-total-val{width:100%;max-width:200px;box-sizing:border-box;font-family:var(--mono);font-size:13px;font-weight:400;padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);}
-
 .ref-links{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
 .ref-link{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-family:var(--sans);text-decoration:none;transition:all .15s;}
 .ref-link:hover{background:var(--surface);border-color:var(--border2);color:var(--text);}
@@ -365,11 +356,6 @@ input[type="number"]{-moz-appearance:textfield;}
     <div class="sec">
       <div class="ref-links" id="m-ref-links" style="margin-top:0;"></div>
       <div class="periods-list" id="m-periods" style="margin-top:2px;"></div>
-      <button class="add-period-btn" onclick="addPeriod()">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="14"></line><line x1="2" y1="8" x2="14" y2="8"></line></svg>
-        配当回を追加（特別配当など）
-      </button>
-      <div class="annual-total" id="m-annual-total"></div>
     </div>
   </div>
 </div>
@@ -533,26 +519,6 @@ function updateTotals(){
   if(ymPre)ymPre.textContent=totalMkt>0?(preTax/totalMkt*100).toFixed(2)+'%':'—';
 }
 
-/* ── Click-to-edit for formatted cells ── */
-function startEdit(td,id,field){
-  const r=portfolio.find(x=>x.id===id);if(!r)return;
-  const val=r[field]||'';
-  const step=r.market==='us'&&field==='buyPrice'?'0.01':'1';
-  td.innerHTML=`<input type="number" value="${val}" min="0" step="${step}"
-    style="width:100%;font-family:var(--mono);font-size:13px;background:transparent;border:none;border-bottom:1px solid var(--border2);text-align:right;outline:none;"
-    onblur="endEdit(this,${id},'${field}')" onkeydown="if(event.key==='Enter')this.blur()">`;
-  const inp=td.querySelector('input');inp.focus();inp.select();
-}
-function endEdit(input,id,field){
-  const r=portfolio.find(x=>x.id===id);if(!r)return;
-  r[field]=parseFloat(input.value)||0;
-  const td=input.parentElement;
-  if(field==='shares') td.textContent=r.shares?r.shares.toLocaleString('ja-JP'):'—';
-  else td.textContent=r.buyPrice?fmtPrice(r,r.buyPrice):'—';
-  td.onclick=()=>startEdit(td,id,field);
-  refreshRowUI('portfolio',r);save();
-}
-
 /* ── Portfolio render ── */
 function renderPortfolio(){
   const tbJp=document.getElementById('portfolio-body-jp');
@@ -569,7 +535,7 @@ function renderPortfolio(){
     const mktJpy=r.shares&&r.mktPrice?(r.market==='us'?r.shares*r.mktPrice*fx:r.shares*r.mktPrice):null;
     const nc='text-align:right;font-family:var(--mono);font-size:13px;color:var(--text);';
     return`<tr data-id="${r.id}">
-      <td style="text-align:left;"><input type="text" class="left" value="${r.code||''}" placeholder="コード" onchange="updRow('portfolio',${r.id},'code',this.value)" onfocus="this.select()"></td>
+      <td style="text-align:left;font-family:var(--mono);font-size:13px;color:var(--text);">${r.code||'—'}</td>
       <td style="text-align:left;">
         <div class="name-cell-wrap" id="name-wrap-${r.id}">
           <a class="ir-link-btn" href="${r.market==='jp'?`https://irbank.net/${r.code}`:`https://finance.yahoo.com/quote/${r.code}/`}" target="_blank" rel="noopener" title="銘柄ページを開く">
@@ -581,8 +547,8 @@ function renderPortfolio(){
           </button>`}
         </div>
       </td>
-      <td class="hm" id="shares-cell-${r.id}" onclick="startEdit(this,${r.id},'shares')" style="cursor:text;${nc}">${r.shares?r.shares.toLocaleString('ja-JP'):'—'}</td>
-      <td class="hm" id="buyprice-cell-${r.id}" onclick="startEdit(this,${r.id},'buyPrice')" style="cursor:text;${nc}">${r.buyPrice?fmtPrice(r,r.buyPrice):'—'}</td>
+      <td class="hm" id="shares-cell-${r.id}" style="${nc}">${r.shares?r.shares.toLocaleString('ja-JP'):'—'}</td>
+      <td class="hm" id="buyprice-cell-${r.id}" style="${nc}">${r.buyPrice?fmtPrice(r,r.buyPrice):'—'}</td>
       <td class="hm" id="mkt-${r.id}" style="${nc}">${mktStr}</td>
       <td class="hm" style="${nc}">${costJpy!==null?fmtJpy(costJpy):'—'}</td>
       <td class="hm" style="${nc}">${mktJpy!==null?fmtJpy(mktJpy):'—'}</td>
@@ -685,20 +651,6 @@ function render(){renderPortfolio();}
 
 /* ── Row ops ── */
 function getList(name){return portfolio;}
-
-function updRow(listName,id,field,val){
-  const list=getList(listName);
-  const r=list.find(x=>x.id===id);if(!r)return;
-  if(field==='code'){
-    // 同じコードが既に存在する場合は重複追加しない
-    const dup=list.find(x=>x.id!==id&&x.code===val.trim());
-    if(dup){alert(`${val}はすでに登録されています`);return;}
-  }
-  if(['shares','buyPrice','mktPrice'].includes(field))r[field]=parseFloat(val)||0;
-  else r[field]=val;
-  if(field==='code'&&divData[val.trim()]){applyDiv(r);renderPortfolio();}
-  refreshRowUI(listName,r);save();
-}
 
 /* ── 銘柄名インライン編集 ── */
 let nameClickTimer=null;
@@ -938,7 +890,7 @@ function renderPeriods(r){
   const list=document.getElementById('m-periods');
   if(!(r.periods&&r.periods.length)){
     list.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px 0;">配当回がありません。</div>';
-    renderAnnualTotal(r);return;
+    return;
   }
   const unit=r.market==='us'?'$':'円';
   const step=r.market==='us'?'0.01':'1';
@@ -956,15 +908,6 @@ function renderPeriods(r){
           <input class="period-div-input" id="pdiv-${p.id}" type="number" value="${r.market==='us'?Number(p.div).toFixed(2):p.div}" step="${step}" min="0" oninput="updPeriod('${p.id}','div',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();closeModal();}"></div>
       </div>
     </div>`).join('');
-  renderAnnualTotal(r);
-}
-
-function renderAnnualTotal(r){
-  const el=document.getElementById('m-annual-total');if(!el)return;
-  const unit=r.market==='us'?'$':'円';
-  const total=annualDiv(r);
-  const totalStr=r.market==='us'?total.toFixed(2):Math.round(total).toLocaleString('ja-JP');
-  el.innerHTML=`<div class="annual-total-hd"><div class="annual-total-label">年間配当合計</div><div class="annual-total-spacer"></div></div><div class="annual-total-sub">配当額（${unit}/1株）</div><div class="annual-total-val">${totalStr}</div>`;
 }
 
 function updPeriod(pid,field,val){
@@ -982,14 +925,7 @@ function updPeriod(pid,field,val){
       }
     }
   }else p[field]=val;
-  refreshRowUI(curList,r);renderAnnualTotal(r);save();syncDiv(r);
-}
-
-function addPeriod(){
-  const list=getList(curList);
-  const r=list.find(x=>x.id===curId);if(!r)return;
-  r.periods.push({id:uid(),label:'特別配当',div:0,exDate:'',payDate:''});
-  save();syncDiv(r);renderPeriods(r);refreshRowUI(curList,r);
+  refreshRowUI(curList,r);save();syncDiv(r);
 }
 
 function delPeriod(pid){
