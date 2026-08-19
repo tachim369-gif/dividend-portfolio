@@ -53,8 +53,10 @@ async function fetchFollow(url, options, maxRedirects) {
   throw new Error('too many redirects');
 }
 
-// 戻り値: 一株配当（円）。取得は成功したが配当データが無い場合は0を返す（確定値）。
-// 通信エラー・想定外の応答の場合は例外を投げる（呼び出し側でリトライ対象）。
+const JP_HISTORY_YEARS = 6;
+
+// 戻り値: { val: 一株配当（円）, month: 決算月（1-12、取得できなければnull）, history: [{period,val,note}] 新しい順 }
+// 配当データが無い場合は val:0 を返す（確定値）。通信エラー・想定外の応答の場合は例外を投げる（呼び出し側でリトライ対象）。
 async function fetchDividendJp(code) {
   const url = `https://f.irbank.net/files/${code}/fy-stock-dividend.json`;
   const res = await fetchFollow(url, {
@@ -70,23 +72,35 @@ async function fetchDividendJp(code) {
   const item = data && data.item;
   if (!item) throw new Error('no item field in response');
 
-  // キーは "YYYY/MM" 形式。新しい年度から順に、有効な一株配当（数値）を探す。
-  // 最新行は {"0":100,...,"備考":"予想"} のようなオブジェクト形式のことがある。
+  // キーは "YYYY/MM" 形式。MM部分がそのまま決算月。
   const years = Object.keys(item).sort(); // 昇順（古い→新しい）
-  for (let i = years.length - 1; i >= 0; i--) {
-    const row = item[years[i]];
-    const raw = Array.isArray(row) ? row[0] : row['0'];
-    const val = parseFloat(raw);
-    if (!isNaN(val) && val > 0) return val;
+  let month = null;
+  if (years.length) {
+    const m = parseInt((years[years.length - 1].split('/')[1] || ''), 10);
+    if (!isNaN(m)) month = m;
   }
-  // データ取得は成功したが、どの年度にも有効な配当額が無い → 配当なしと確定
-  return 0;
+
+  // 新しい年度から順に、有効な一株配当（数値）と備考（予想など）を集める
+  const history = [];
+  let val = 0;
+  let valSet = false;
+  for (let i = years.length - 1; i >= 0 && history.length < JP_HISTORY_YEARS; i--) {
+    const period = years[i];
+    const row = item[period];
+    const raw = Array.isArray(row) ? row[0] : row['0'];
+    const v = parseFloat(raw);
+    if (isNaN(v)) continue;
+    const note = (!Array.isArray(row) && row['備考']) ? String(row['備考']) : '';
+    history.push({ period, val: v, note });
+    if (!valSet && v > 0) { val = v; valSet = true; }
+  }
+  return { val, month, history };
 }
 
-/* ── 米国株：Yahoo Financeの配当イベント（実績）を直近12ヶ月分合計 ── */
-// 戻り値: 一株配当（ドル）。配当イベントが無い銘柄（無配企業など）は0を返す（確定値）。
+/* ── 米国株：Yahoo Financeの配当イベント（実績）を利用 ── */
+// 戻り値: { val: 直近12ヶ月の一株配当合計（ドル）, count: 直近1年の配当回数, history: [{date,val}] 新しい順（最大16件） }
 async function fetchDividendUs(code) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${code}?interval=1d&range=1y&events=div`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${code}?interval=1d&range=6y&events=div`;
   const res = await fetch(url, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -100,21 +114,29 @@ async function fetchDividendUs(code) {
   if (!result) throw new Error('no result field in response');
 
   const divEvents = result.events && result.events.dividends;
-  if (!divEvents) return 0; // 配当イベントが無い＝無配と確定
+  if (!divEvents) return { val: 0, count: 0, history: [] }; // 配当イベントが無い＝無配と確定
 
   const nowSec = Date.now() / 1000;
   const oneYearAgoSec = nowSec - 365 * 24 * 3600;
   let total = 0;
   let count = 0;
+  const all = [];
   Object.values(divEvents).forEach(ev => {
     const amount = parseFloat(ev && ev.amount);
     const ts = ev && (ev.date != null ? ev.date : null);
-    if (!isNaN(amount) && amount > 0 && (ts == null || ts >= oneYearAgoSec)) {
+    if (isNaN(amount) || amount <= 0) return;
+    if (ts != null) {
+      const d = new Date(ts * 1000);
+      all.push({ ts, date: d.toISOString().slice(0, 10), val: Math.round(amount * 100) / 100 });
+    }
+    if (ts == null || ts >= oneYearAgoSec) {
       total += amount;
       count++;
     }
   });
-  return count > 0 ? Math.round(total * 100) / 100 : 0; // 直近1年に配当が無ければ0と確定
+  all.sort((a, b) => b.ts - a.ts); // 新しい順
+  const history = all.slice(0, 16).map(({ date, val }) => ({ date, val }));
+  return { val: count > 0 ? Math.round(total * 100) / 100 : 0, count, history };
 }
 
 exports.handler = async function(event) {
@@ -131,6 +153,9 @@ exports.handler = async function(event) {
   try {
     const { codes } = JSON.parse(event.body || '{}');
     const dividends = {};
+    const months = {};
+    const counts = {};
+    const history = {};
     const errors = {};
     const maxAttempts = 3;
     const concurrency = 8;
@@ -138,18 +163,23 @@ exports.handler = async function(event) {
 
     await runWithConcurrency(codes || [], async ({ code, market }) => {
       try {
-        const val = await withRetry(
-          () => (market === 'us' ? fetchDividendUs(code) : fetchDividendJp(code)),
-          maxAttempts,
-          deadline
-        );
-        dividends[code] = val; // 0も含めて「取得成功」
+        if (market === 'us') {
+          const { val, count, history: h } = await withRetry(() => fetchDividendUs(code), maxAttempts, deadline);
+          dividends[code] = val; // 0も含めて「取得成功」
+          counts[code] = count;
+          if (h && h.length) history[code] = h;
+        } else {
+          const { val, month, history: h } = await withRetry(() => fetchDividendJp(code), maxAttempts, deadline);
+          dividends[code] = val; // 0も含めて「取得成功」
+          if (month != null) months[code] = month;
+          if (h && h.length) history[code] = h;
+        }
       } catch (e) {
         errors[code] = e.message;
       }
     }, concurrency);
 
-    return { statusCode: 200, headers, body: JSON.stringify({ dividends, errors }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ dividends, months, counts, history, errors }) };
   } catch (e) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
   }
