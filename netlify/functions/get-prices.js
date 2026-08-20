@@ -39,7 +39,7 @@ exports.handler = async function(event) {
     ];
     for (const { key, symbol } of indices) {
       try {
-        const idxRes = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`, {
+        const idxRes = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': '*/*',
@@ -47,9 +47,19 @@ exports.handler = async function(event) {
           }
         });
         const idxData = await idxRes.json();
-        const meta = idxData?.chart?.result?.[0]?.meta;
+        const idxResult = idxData?.chart?.result?.[0];
+        const meta = idxResult?.meta;
         const val = meta?.regularMarketPrice || meta?.previousClose;
         if (val) prices[key] = val;
+        let idxPc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
+        if (!idxPc) {
+          const closes = idxResult?.indicators?.quote?.[0]?.close;
+          if (Array.isArray(closes)) {
+            const valid = closes.filter(v => v != null);
+            if (valid.length >= 2) idxPc = valid[valid.length - 2];
+          }
+        }
+        if (idxPc) prevClose[key] = idxPc;
       } catch(e) {
         console.warn(`Index fetch failed (${key}):`, e.message);
       }
