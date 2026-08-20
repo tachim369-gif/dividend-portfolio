@@ -116,27 +116,39 @@ async function fetchDividendUs(code) {
   const divEvents = result.events && result.events.dividends;
   if (!divEvents) return { val: 0, count: 0, history: [] }; // 配当イベントが無い＝無配と確定
 
-  const nowSec = Date.now() / 1000;
-  const oneYearAgoSec = nowSec - 365 * 24 * 3600;
-  let total = 0;
-  let count = 0;
   const all = [];
   Object.values(divEvents).forEach(ev => {
     const amount = parseFloat(ev && ev.amount);
     const ts = ev && (ev.date != null ? ev.date : null);
-    if (isNaN(amount) || amount <= 0) return;
-    if (ts != null) {
-      const d = new Date(ts * 1000);
-      all.push({ ts, date: d.toISOString().slice(0, 10), val: Math.round(amount * 100) / 100 });
-    }
-    if (ts == null || ts >= oneYearAgoSec) {
-      total += amount;
-      count++;
-    }
+    if (isNaN(amount) || amount <= 0 || ts == null) return;
+    const d = new Date(ts * 1000);
+    all.push({ ts, date: d.toISOString().slice(0, 10), val: Math.round(amount * 100) / 100 });
   });
   all.sort((a, b) => b.ts - a.ts); // 新しい順
   const history = all.slice(0, 16).map(({ date, val }) => ({ date, val }));
-  return { val: count > 0 ? Math.round(total * 100) / 100 : 0, count, history };
+
+  if (!all.length) return { val: 0, count: 0, history };
+
+  // 年間配当額 = 直近の1回あたり配当額 × 年間支払回数。
+  // 「直近12ヶ月の実績合計」だと集計ウィンドウの端で支払いが1回落ちるだけで見かけ上「減配」になってしまうため、
+  // 直近数回の支払い間隔から支払い頻度（毎月/四半期/半期/年1回）を推定し、それに最新の1回分の金額を掛けて算出する。
+  const sample = all.slice(0, 8); // 直近最大8回ぶんの間隔を見る
+  const gaps = [];
+  for (let i = 0; i < sample.length - 1; i++) {
+    gaps.push((sample[i].ts - sample[i + 1].ts) / (24 * 3600));
+  }
+  let freq = 1;
+  if (gaps.length) {
+    gaps.sort((a, b) => a - b);
+    const medianGap = gaps[Math.floor(gaps.length / 2)];
+    if (medianGap <= 45) freq = 12;
+    else if (medianGap <= 135) freq = 4;
+    else if (medianGap <= 270) freq = 2;
+    else freq = 1;
+  }
+  const latest = all[0].val;
+  const val = Math.round(latest * freq * 100) / 100;
+  return { val, count: freq, history };
 }
 
 exports.handler = async function(event) {
