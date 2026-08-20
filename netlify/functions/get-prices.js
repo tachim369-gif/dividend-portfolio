@@ -1,3 +1,24 @@
+// 前日終値を推定する。meta系フィールドが無い場合は日足終値配列から求めるが、
+// 単純に「配列の最後から2番目」を使うと、今日の足がまだ形成中（＝配列の最後が前日終値そのもの）のケースで
+// 実際には前々日の終値と比較してしまい、前日比の符号がズレることがある。
+// そこで「現在値が配列の最後の終値と一致する（＝今日の足は既に確定済み）かどうか」で使う位置を切り替える。
+function derivePrevCloseFromCandles(price, closes) {
+  if (!Array.isArray(closes)) return null;
+  const valid = closes.filter(v => v != null);
+  if (valid.length < 2) return null;
+  const last = valid[valid.length - 1];
+  const secondLast = valid[valid.length - 2];
+  if (price != null && last != null) {
+    const tol = Math.max(1e-6, Math.abs(last) * 0.0005); // 浮動小数の誤差を許容
+    if (Math.abs(price - last) <= tol) {
+      // 現在値＝最後の確定終値 → 今日の足は既に確定済み。前日終値はその1つ前。
+      return secondLast;
+    }
+  }
+  // 現在値が最後の確定終値と異なる（＝今日はまだ引けてない/形成中）→最後の確定終値が前日終値
+  return last;
+}
+
 exports.handler = async function(event) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -54,10 +75,7 @@ exports.handler = async function(event) {
         let idxPc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
         if (!idxPc) {
           const closes = idxResult?.indicators?.quote?.[0]?.close;
-          if (Array.isArray(closes)) {
-            const valid = closes.filter(v => v != null);
-            if (valid.length >= 2) idxPc = valid[valid.length - 2];
-          }
+          idxPc = derivePrevCloseFromCandles(val, closes);
         }
         if (idxPc) prevClose[key] = idxPc;
       } catch(e) {
@@ -82,14 +100,11 @@ exports.handler = async function(event) {
         const meta = result?.meta;
         const price = meta?.regularMarketPrice || meta?.previousClose;
         if (price) prices[code] = price;
-        // previousClose: まずmetaのフィールドを試し、無ければ日足終値配列の「最新の1つ前」を使う
+        // previousClose: まずmetaのフィールドを試し、無ければ日足終値配列から推定
         let pc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
         if (!pc) {
           const closes = result?.indicators?.quote?.[0]?.close;
-          if (Array.isArray(closes)) {
-            const valid = closes.filter(v => v != null);
-            if (valid.length >= 2) pc = valid[valid.length - 2];
-          }
+          pc = derivePrevCloseFromCandles(price, closes);
         }
         if (pc) prevClose[code] = pc;
       } catch(e) {
