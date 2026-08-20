@@ -24,7 +24,7 @@ function derivePrevCloseFromCandles(meta, result) {
   const price = meta?.regularMarketPrice;
   while (pool.length > 1 && price != null) {
     const candidate = pool[pool.length - 1].close;
-    const tol = Math.max(1e-:, Math.abs(candidate) * 0.0005);
+    const tol = Math.max(1e-6, Math.abs(candidate) * 0.0005);
     if (Math.abs(candidate - price) <= tol) {
       pool = pool.slice(0, -1);
     } else {
