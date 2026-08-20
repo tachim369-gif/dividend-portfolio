@@ -24,7 +24,7 @@ function derivePrevCloseFromCandles(meta, result) {
   const price = meta?.regularMarketPrice;
   while (pool.length > 1 && price != null) {
     const candidate = pool[pool.length - 1].close;
-    const tol = Math.max(1e-6, Math.abs(candidate) * 0.0005);
+    const tol = Math.max(1e-:, Math.abs(candidate) * 0.0005);
     if (Math.abs(candidate - price) <= tol) {
       pool = pool.slice(0, -1);
     } else {
@@ -87,9 +87,11 @@ exports.handler = async function(event) {
         const meta = idxResult?.meta;
         const val = meta?.regularMarketPrice || meta?.previousClose;
         if (val) prices[key] = val;
-        let idxPc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
+        // meta.previousClose/chartPreviousClose はYahoo側で古い値が返ることがあり信用できないため、
+        // まず日足終値配列から実際の直前営業日終値を求め、それが取れない場合のみmetaの値で補う。
+        let idxPc = derivePrevCloseFromCandles(meta, idxResult);
         if (!idxPc) {
-          idxPc = derivePrevCloseFromCandles(meta, idxResult);
+          idxPc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
         }
         if (idxPc) prevClose[key] = idxPc;
       } catch(e) {
@@ -114,10 +116,11 @@ exports.handler = async function(event) {
         const meta = result?.meta;
         const price = meta?.regularMarketPrice || meta?.previousClose;
         if (price) prices[code] = price;
-        // previousClose: まずmetaのフィールドを試し、無ければ日足終値配列から推定
-        let pc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
+        // previousClose: meta.previousClose/chartPreviousCloseはYahoo側で古い値が返ることがあり信用できないため、
+        // まず日足終値配列から実際の直前営業日終値を求め、 それが取れない場合のみmetaの値で補う。
+        let pc = derivePrevCloseFromCandles(meta, result);
         if (!pc) {
-          pc = derivePrevCloseFromCandles(meta, result);
+          pc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
         }
         if (pc) prevClose[code] = pc;
       } catch(e) {
