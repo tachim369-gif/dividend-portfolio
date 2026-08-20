@@ -21,10 +21,12 @@
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;font-variant-numeric:normal;}
 
 /* Header */
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;}
-.h-title{font-size:21px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--accent);}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:flex-start;gap:24px;position:sticky;top:0;z-index:20;}
+.h-title{font-size:27px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:9px;color:var(--accent);}
 .h-icon{flex-shrink:0;}
-.h-right{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
+.h-right{display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+.h-row{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;}
+.time-box{display:inline-flex;align-items:center;padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:13px;font-family:var(--mono);white-space:nowrap;}
 .fx-label{font-size:12px;color:var(--text2);}
 .fx-box{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);}
 .fx-input{font-family:var(--mono);font-size:13px;width:44px;padding:0;border:none;background:transparent;color:var(--text);text-align:left;box-sizing:content-box;}
@@ -157,7 +159,7 @@ input[type="number"]{-moz-appearance:textfield;}
   .sum-card{padding:10px 8px;}
   .sum-lbl{font-size:11px;}
   .sum-val{font-size:14px;}
-  header{padding:0 12px;}
+  header{padding:8px 12px;}
   .hm{display:none;}
 }
 </style>
@@ -167,37 +169,47 @@ input[type="number"]{-moz-appearance:textfield;}
 <header>
   <div class="h-title"><svg class="h-icon" width="22" height="22" viewBox="0 0 16 16"><rect x="0" y="0" width="16" height="16" rx="4" fill="#1a1a1a"></rect><rect x="2" y="10" width="1.8" height="3" rx="0.5" fill="#1f5c38"></rect><rect x="5.4" y="8" width="1.8" height="5" rx="0.5" fill="#2c8050"></rect><rect x="8.8" y="5.5" width="1.8" height="7.5" rx="0.5" fill="#3fae6c"></rect><rect x="12.2" y="3" width="1.8" height="10" rx="0.5" fill="#5fe28c"></rect></svg>配当ポートフォリオ</div>
   <div class="h-right">
-    <span class="fx-box hm">
-      <span class="fx-label">日経平均</span>
-      <span class="idx-val" id="idx-n225">—</span>
-      <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
-    </span>
-    <span class="fx-box hm">
-      <span class="fx-label">NYダウ</span>
-      <span class="idx-val" id="idx-dji">—</span>
-      <span class="fx-label" style="font-family:var(--mono);font-size:13px;">$</span>
-    </span>
-    <span class="fx-box hm">
-      <span class="fx-label">S&amp;P500</span>
-      <span class="idx-val" id="idx-sp500">—</span>
-      <span class="fx-label" style="font-family:var(--mono);font-size:13px;">$</span>
-    </span>
-    <span class="fx-box">
-      <span class="fx-label">USD/JPY</span>
-      <input type="number" class="fx-input" id="fx-rate" value="155.00" min="100" max="300" step="0.1">
-      <span id="fx-measure" style="position:absolute;visibility:hidden;white-space:pre;font-family:var(--mono);font-size:13px;"></span>
-      <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
-    </span>
-    <button class="price-update-btn" id="price-btn" onclick="updateAllPrices()" style="flex-shrink:0;white-space:nowrap;width:210px;justify-content:center;">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a5 5 0 019-3"></path><path d="M13 8a5 5 0 01-9 3"></path><polyline points="12,2 12,5 9,5"></polyline><polyline points="4,14 4,11 7,11"></polyline></svg>
-      <span id="price-btn-label">株価更新</span>
-      <span class="last-updated" id="last-updated">0/0 00:00</span>
-    </button>
-    <button class="price-update-btn" id="bulkdiv-btn" onclick="updateAllDividends()" style="flex-shrink:0;white-space:nowrap;width:210px;justify-content:center;">
-      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a5 5 0 019-3"></path><path d="M13 8a5 5 0 01-9 3"></path><polyline points="12,2 12,5 9,5"></polyline><polyline points="4,14 4,11 7,11"></polyline></svg>
-      <span id="bulkdiv-btn-label">配当更新</span>
-      <span class="last-updated" id="bulkdiv-last-updated">0/0 00:00</span>
-    </button>
+    <div class="h-row">
+      <span id="live-clock" class="time-box"></span>
+      <button class="price-update-btn" id="price-btn" onclick="updateAllPrices()" style="flex-shrink:0;white-space:nowrap;width:210px;justify-content:center;">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a5 5 0 019-3"></path><path d="M13 8a5 5 0 01-9 3"></path><polyline points="12,2 12,5 9,5"></polyline><polyline points="4,14 4,11 7,11"></polyline></svg>
+        <span id="price-btn-label">株価更新</span>
+        <span class="last-updated" id="last-updated">0/0 00:00</span>
+      </button>
+      <button class="price-update-btn" id="bulkdiv-btn" onclick="updateAllDividends()" style="flex-shrink:0;white-space:nowrap;width:210px;justify-content:center;">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a5 5 0 019-3"></path><path d="M13 8a5 5 0 01-9 3"></path><polyline points="12,2 12,5 9,5"></polyline><polyline points="4,14 4,11 7,11"></polyline></svg>
+        <span id="bulkdiv-btn-label">配当更新</span>
+        <span class="last-updated" id="bulkdiv-last-updated">0/0 00:00</span>
+      </button>
+    </div>
+    <div class="h-row">
+      <span class="fx-box hm">
+        <span class="fx-label">日経平均</span>
+        <span class="idx-val" id="idx-n225">—</span>
+        <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
+      </span>
+      <span class="fx-box hm">
+        <span class="fx-label">NYダウ</span>
+        <span class="idx-val" id="idx-dji">—</span>
+        <span class="fx-label" style="font-family:var(--mono);font-size:13px;">$</span>
+      </span>
+      <span class="fx-box hm">
+        <span class="fx-label">S&amp;P500</span>
+        <span class="idx-val" id="idx-sp500">—</span>
+        <span class="fx-label" style="font-family:var(--mono);font-size:13px;">$</span>
+      </span>
+      <span class="fx-box hm">
+        <span class="fx-label">GOLD</span>
+        <span class="idx-val" id="idx-gold">—</span>
+        <span class="fx-label" style="font-family:var(--mono);font-size:13px;">$</span>
+      </span>
+      <span class="fx-box">
+        <span class="fx-label">USD/JPY</span>
+        <input type="number" class="fx-input" id="fx-rate" value="155.00" min="100" max="300" step="0.1">
+        <span id="fx-measure" style="position:absolute;visibility:hidden;white-space:pre;font-family:var(--mono);font-size:13px;"></span>
+        <span class="fx-label" style="font-family:var(--mono);font-size:13px;">円</span>
+      </span>
+    </div>
   </div>
 </header>
 
@@ -440,7 +452,7 @@ input[type="number"]{-moz-appearance:textfield;}
     <div>
       <div class="modal-title" id="m-title">銘柄詳細</div>
       <div class="modal-sub" id="m-sub"></div>
-      <div class="settle-edit">
+      <div class="settle-edit" id="m-settle-wrap">
         <label for="m-settlement">決算月</label>
         <select id="m-settlement" onchange="updSettlement(this.value)">
           <option value="">未設定</option>
@@ -488,9 +500,10 @@ function save(){
   const idxN225=document.getElementById('idx-n225').textContent;
   const idxDji=document.getElementById('idx-dji').textContent;
   const idxSp500=document.getElementById('idx-sp500').textContent;
+  const idxGold=document.getElementById('idx-gold').textContent;
   const divUpdatedEl=document.getElementById('bulkdiv-last-updated');
   const divUpdated=divUpdatedEl?divUpdatedEl.textContent:'';
-  localStorage.setItem(SK,JSON.stringify({portfolio,nextId,fxRate,idxN225,idxDji,idxSp500,divUpdated,depositJpy,acctDeposit,acctTransfer}));
+  localStorage.setItem(SK,JSON.stringify({portfolio,nextId,fxRate,idxN225,idxDji,idxSp500,idxGold,divUpdated,depositJpy,acctDeposit,acctTransfer}));
 }
 function saveDiv(){
   try{localStorage.setItem(DK,JSON.stringify(divData));}catch(e){}
@@ -522,6 +535,7 @@ function load(){
       if(d.idxN225) document.getElementById('idx-n225').textContent=d.idxN225;
       if(d.idxDji) document.getElementById('idx-dji').textContent=d.idxDji;
       if(d.idxSp500) document.getElementById('idx-sp500').textContent=d.idxSp500;
+      if(d.idxGold) document.getElementById('idx-gold').textContent=d.idxGold;
       if(d.divUpdated){
         const el=document.getElementById('bulkdiv-last-updated');
         if(el)el.textContent=d.divUpdated;
@@ -751,7 +765,7 @@ function renderPortfolio(){
       <td class="hm" id="shares-cell-${r.id}" style="${nc}">${r.shares?r.shares.toLocaleString('ja-JP'):'—'}</td>
       <td class="hm" id="buyprice-cell-${r.id}" style="${nc}">${r.buyPrice?fmtPrice(r,r.buyPrice):'—'}</td>
       <td class="hm" id="mkt-${r.id}" style="${nc}">${mktStr}</td>
-      <td class="hm" id="pchg-${r.id}" style="text-align:right;font-family:var(--mono);font-size:13px;color:${priceChangeColor(r)};">${priceChangeHtml(r)}</td>
+      <td class="hm" id="pchg-${r.id}" style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:${priceChangeColor(r)};">${priceChangeHtml(r)}</td>
       <td class="hm" style="${nc}">${costJpy!==null?fmtJpy(costJpy):'—'}</td>
       <td class="hm" style="${nc}">${mktJpy!==null?fmtJpy(mktJpy):'—'}</td>
       <td class="hm" id="gain-${r.id}" style="font-family:var(--mono);font-size:13px;color:${g!==null?(g>=0?'var(--gain-up)':'var(--gain-down)'):'var(--text3)'};">${fmtGainHtml(g)}</td>
@@ -775,7 +789,7 @@ function renderPortfolio(){
     <th style="width:40px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">株数</th>
     <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">取得単価(¥)</th>
     <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢単価(¥)</th>
-    <th style="width:62px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">前日比</th>
+    <th style="width:56px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">前日比(¥)</th>
     <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">取得価額(¥)</th>
     <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢価額(¥)</th>
     <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">評価損益(¥)</th>
@@ -790,7 +804,7 @@ function renderPortfolio(){
     <th style="width:40px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">株数</th>
     <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">取得単価($)</th>
     <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢単価($)</th>
-    <th style="width:62px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">前日比</th>
+    <th style="width:56px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">前日比($)</th>
     <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">取得価額(¥)</th>
     <th style="width:85px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">実勢価額(¥)</th>
     <th style="width:78px;text-align:right;padding:6px 8px;font-size:11px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);" class="hm">評価損益(¥)</th>
@@ -810,7 +824,7 @@ function renderPortfolio(){
     const yldMktSum=mktSum>0?(annSum/mktSum*100):null;
     return`<tr style="background:${bg};font-weight:600;">
       <td style="text-align:left;padding:8px 8px;font-size:12px;color:var(--text2);">合計</td>
-      <td></td><td></td><td></td><td></td>
+      <td></td><td></td><td></td><td></td><td></td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);">${fmtJpy(costSum)}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:var(--text2);">${fmtJpy(mktSum)}</td>
       <td style="text-align:right;padding:8px 8px;font-family:var(--mono);font-size:13px;color:${gainSum>=0?'var(--gain-up)':'var(--gain-down)'};">${fmtGainHtml(gainSum)}</td>
@@ -955,6 +969,7 @@ async function updateAllPrices(){
     if(prices['N225']!=null)document.getElementById('idx-n225').textContent=fmtNum(prices['N225']);
     if(prices['DJI']!=null)document.getElementById('idx-dji').textContent=fmtNum(prices['DJI']);
     if(prices['SP500']!=null)document.getElementById('idx-sp500').textContent=fmtNum(prices['SP500']);
+    if(prices['GOLD']!=null)document.getElementById('idx-gold').textContent=fmtNum(prices['GOLD']);
 
     let updated=0;
     allRows.forEach(r=>{
@@ -1074,6 +1089,8 @@ function openModal(listName,id){
   const freqStr=(r.market==='us'&&r.divCount!=null)?`　年${r.divCount}回`:'';
   document.getElementById('m-sub').textContent=(r.market==='jp'?'東証　':'NYSE/NASDAQ　')+(r.code||'')+freqStr;
   document.getElementById('m-settlement').value=r.settlementMonth||'';
+  const settleWrap=document.getElementById('m-settle-wrap');
+  if(settleWrap)settleWrap.style.display=(r.market==='us')?'none':'flex';
   renderRefLinks(r);renderPeriods(r);renderDivHistory(r);
   document.getElementById('overlay').classList.add('open');
 }
@@ -1439,6 +1456,17 @@ document.getElementById('fx-rate').addEventListener('input',()=>{sizeFxInput();r
 loadDiv();load();render();
 sizeFxInput();
 updateAllPrices();
+
+function updateLiveClock(){
+  const el=document.getElementById('live-clock');
+  if(!el)return;
+  const now=new Date();
+  const w=['日','月','火','水','木','金','土'][now.getDay()];
+  const p=n=>String(n).padStart(2,'0');
+  el.textContent=`${now.getFullYear()}/${p(now.getMonth()+1)}/${p(now.getDate())}(${w}) ${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())}`;
+}
+updateLiveClock();
+setInterval(updateLiveClock,1000);
 </script>
 
 </body>
