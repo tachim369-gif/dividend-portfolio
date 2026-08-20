@@ -30,11 +30,12 @@ exports.handler = async function(event) {
       console.warn('FX fetch failed:', e.message);
     }
 
-    // 主要指数取得（日経平均・NYダウ・S&P500）
+    // 主要指数取得（日経平均・NYダウ・S&P500・NY金先物）
     const indices = [
       { key: 'N225', symbol: '^N225' },
       { key: 'DJI', symbol: '^DJI' },
-      { key: 'SP500', symbol: '^GSPC' }
+      { key: 'SP500', symbol: '^GSPC' },
+      { key: 'GOLD', symbol: 'GC=F' }
     ];
     for (const { key, symbol } of indices) {
       try {
@@ -61,3 +62,34 @@ exports.handler = async function(event) {
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=5d`;
         const res = await fetch(url, {
           headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': '*/*',
+            'Referer': 'https://finance.yahoo.com'
+          }
+        });
+        const data = await res.json();
+        const result = data?.chart?.result?.[0];
+        const meta = result?.meta;
+        const price = meta?.regularMarketPrice || meta?.previousClose;
+        if (price) prices[code] = price;
+        // previousClose: まずmetaのフィールドを試し、無ければ日足終値配列の「最新の1つ前」を使う
+        let pc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
+        if (!pc) {
+          const closes = result?.indicators?.quote?.[0]?.close;
+          if (Array.isArray(closes)) {
+            const valid = closes.filter(v => v != null);
+            if (valid.length >= 2) pc = valid[valid.length - 2];
+          }
+        }
+        if (pc) prevClose[code] = pc;
+      } catch(e) {
+        console.warn(`Failed ${code}:`, e.message);
+      }
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    return { statusCode: 200, headers, body: JSON.stringify({ prices, prevClose }) };
+  } catch(e) {
+    return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
+  }
+};
