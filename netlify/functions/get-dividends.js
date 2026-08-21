@@ -1,37 +1,154 @@
-// 前日終値を推定する。meta系フィールドが無い場合は日足終値配列から求める。
-// 「配列の最後」や「価格が一致するか」で判定するのは、データの反映タイミング次第でズレることがあるため、
-// 取引所のローカル日付（gmtoffsetで補正）で「今日の足」を明確に除外し、直前の営業日の終値を使う。
-function localDateKey(epochSec, gmtoffsetSec) {
-  const d = new Date((epochSec + (gmtoffsetSec || 0)) * 1000);
-  return `${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`;
+/* ── 共通ユーティリティ ── */
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
 }
-function derivePrevCloseFromCandles(meta, result) {
-  const closes = result?.indicators?.quote?.[0]?.close;
-  const timestamps = result?.timestamp;
-  if (!Array.isArray(closes) || !Array.isArray(timestamps)) return null;
-  const pairs = [];
-  for (let i = 0; i < closes.length; i++) {
-    if (closes[i] != null && timestamps[i] != null) pairs.push({ ts: timestamps[i], close: closes[i] });
-  }
-  if (!pairs.length) return null;
-  const gmtoffset = meta?.gmtoffset || 0;
-  const nowTs = meta?.regularMarketTime;
-  const todayKey = nowTs != null ? localDateKey(nowTs, gmtoffset) : null;
-  // 今日の日付と同じ足（形成中 or 反映済みどちらでも）は除外し、直前の営業日を使う
-  let pool = (todayKey ? pairs.filter(p => localDateKey(p.ts, gmtoffset) !== todayKey) : pairs.slice());
-  if (!pool.length) pool = pairs.slice();
-  // 安全策：日付判定がズレて結局「現在値と同じ足」を拾ってしまった場合は、もう1つ前を使う
-  const price = meta?.regularMarketPrice;
-  while (pool.length > 1 && price != null) {
-    const candidate = pool[pool.length - 1].close;
-    const tol = Math.max(1e-6, Math.abs(candidate) * 0.0005);
-    if (Math.abs(candidate - price) <= tol) {
-      pool = pool.slice(0, -1);
-    } else {
-      break;
+
+// Netlify Functionsの実行時間上限に配慮し、締め切り時刻を過ぎたら早めに諦める
+async function withRetry(fn, maxAttempts, deadline) {
+  let lastErr = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    if (Date.now() > deadline) {
+      throw lastErr || new Error('deadline exceeded');
+    }
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+      if (attempt < maxAttempts && Date.now() < deadline) {
+        await sleep(Math.min(500 * attempt + Math.floor(Math.random() * 400), Math.max(0, deadline - Date.now())));
+      }
     }
   }
-  return pool[pool.length - 1].close;
+  throw lastErr;
+}
+
+// 同時実行数を絞ってタスクを処理する（サーバー側のアクセス制限を避けるため）
+async function runWithConcurrency(items, worker, concurrency) {
+  let idx = 0;
+  async function runNext() {
+    while (idx < items.length) {
+      const i = idx++;
+      await worker(items[i]);
+    }
+  }
+  const pool = [];
+  const n = Math.min(concurrency, items.length);
+  for (let i = 0; i < n; i++) pool.push(runNext());
+  await Promise.all(pool);
+}
+
+/* ── 日本株：IRBANKの配当データファイルを利用 ── */
+async function fetchFollow(url, options, maxRedirects) {
+  let currentUrl = url;
+  for (let i = 0; i <= maxRedirects; i++) {
+    const res = await fetch(currentUrl, Object.assign({}, options, { redirect: 'manual' }));
+    if ([301, 302, 303, 307, 308].indexOf(res.status) !== -1) {
+      const loc = res.headers.get('location');
+      if (!loc) return res;
+      currentUrl = new URL(loc, currentUrl).toString();
+      continue;
+    }
+    return res;
+  }
+  throw new Error('too many redirects');
+}
+
+const JP_HISTORY_YEARS = 6;
+
+// 戻り値: { val: 一株配当（円）, month: 決算月（1-12、取得できなければnull）, history: [{period,val,note}] 新しい順 }
+// 配当データが無い場合は val:0 を返す（確定値）。通信エラー・想定外の応答の場合は例外を投げる（呼び出し側でリトライ対象）。
+async function fetchDividendJp(code) {
+  const url = `https://f.irbank.net/files/${code}/fy-stock-dividend.json`;
+  const res = await fetchFollow(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json,text/plain,*/*',
+      'Accept-Language': 'ja,en;q=0.8',
+      'Referer': 'https://irbank.net/'
+    }
+  }, 5);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const item = data && data.item;
+  if (!item) throw new Error('no item field in response');
+
+  // キーは "YYYY/MM" 形式。MM部分がそのまま決算月。
+  const years = Object.keys(item).sort(); // 昇順（古い→新しい）
+  let month = null;
+  if (years.length) {
+    const m = parseInt((years[years.length - 1].split('/')[1] || ''), 10);
+    if (!isNaN(m)) month = m;
+  }
+
+  // 新しい年度から順に、有効な一株配当（数値）と備考（予想など）を集める
+  const history = [];
+  let val = 0;
+  let valSet = false;
+  for (let i = years.length - 1; i >= 0 && history.length < JP_HISTORY_YEARS; i--) {
+    const period = years[i];
+    const row = item[period];
+    const raw = Array.isArray(row) ? row[0] : row['0'];
+    const v = parseFloat(raw);
+    if (isNaN(v)) continue;
+    const note = (!Array.isArray(row) && row['備考']) ? String(row['備考']) : '';
+    history.push({ period, val: v, note });
+    if (!valSet && v > 0) { val = v; valSet = true; }
+  }
+  return { val, month, history };
+}
+
+/* ── 米国株：Yahoo Financeの配当イベント（実績）を利用 ── */
+// 戻り値: { val: 直近12ヶ月の一株配当合計（ドル）, count: 直近1年の配当回数, history: [{date,val}] 新しい順（最大16件） }
+async function fetchDividendUs(code) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${code}?interval=1d&range=6y&events=div`;
+  const res = await fetch(url, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': '*/*',
+      'Referer': 'https://finance.yahoo.com'
+    }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const result = data && data.chart && data.chart.result && data.chart.result[0];
+  if (!result) throw new Error('no result field in response');
+
+  const divEvents = result.events && result.events.dividends;
+  if (!divEvents) return { val: 0, count: 0, history: [] }; // 配当イベントが無い＝無配と確定
+
+  const all = [];
+  Object.values(divEvents).forEach(ev => {
+    const amount = parseFloat(ev && ev.amount);
+    const ts = ev && (ev.date != null ? ev.date : null);
+    if (isNaN(amount) || amount <= 0 || ts == null) return;
+    const d = new Date(ts * 1000);
+    all.push({ ts, date: d.toISOString().slice(0, 10), val: Math.round(amount * 100) / 100 });
+  });
+  all.sort((a, b) => b.ts - a.ts); // 新しい順
+  const history = all.slice(0, 16).map(({ date, val }) => ({ date, val }));
+
+  if (!all.length) return { val: 0, count: 0, history };
+
+  // 年間配当額 = 直近の1回あたり配当額 × 年間支払回数。
+  // 「直近12ヶ月の実績合計」だと集計ウィンドウの端で支払いが1回落ちるだけで見かけ上「減配」になってしまうため、
+  // 直近数回の支払い間隔から支払い頻度（毎月/四半期/半期/年1回）を推定し、それに最新の1回分の金額を掛けて算出する。
+  const sample = all.slice(0, 8); // 直近最大8回ぶんの間隔を見る
+  const gaps = [];
+  for (let i = 0; i < sample.length - 1; i++) {
+    gaps.push((sample[i].ts - sample[i + 1].ts) / (24 * 3600));
+  }
+  let freq = 1;
+  if (gaps.length) {
+    gaps.sort((a, b) => a - b);
+    const medianGap = gaps[Math.floor(gaps.length / 2)];
+    if (medianGap <= 45) freq = 12;
+    else if (medianGap <= 135) freq = 4;
+    else if (medianGap <= 270) freq = 2;
+    else freq = 1;
+  }
+  const latest = all[0].val;
+  const val = Math.round(latest * freq * 100) / 100;
+  return { val, count: freq, history };
 }
 
 exports.handler = async function(event) {
@@ -47,87 +164,35 @@ exports.handler = async function(event) {
 
   try {
     const { codes } = JSON.parse(event.body || '{}');
-    const prices = {};
-    const prevClose = {};
+    const dividends = {};
+    const months = {};
+    const counts = {};
+    const history = {};
+    const errors = {};
+    const maxAttempts = 3;
+    const concurrency = 8;
+    const deadline = Date.now() + 15000; // 全体の締め切り（15秒、Netlify関数のタイムアウト対策）
 
-    // 為替レート取得
-    try {
-      const fxRes = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/USDJPY=X?interval=1d&range=1d', {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': '*/*',
-          'Referer': 'https://finance.yahoo.com'
-        }
-      });
-      const fxData = await fxRes.json();
-      const fxRate = fxData?.chart?.result?.[0]?.meta?.regularMarketPrice;
-      if (fxRate) prices['USDJPY'] = fxRate;
-    } catch(e) {
-      console.warn('FX fetch failed:', e.message);
-    }
-
-    // 主要指数取得（日経平均・NYダウ・S&P500・NY金先物）
-    const indices = [
-      { key: 'N225', symbol: '^N225' },
-      { key: 'DJI', symbol: '^DJI' },
-      { key: 'SP500', symbol: '^GSPC' },
-      { key: 'GOLD', symbol: 'GC=F' }
-    ];
-    for (const { key, symbol } of indices) {
+    await runWithConcurrency(codes || [], async ({ code, market }) => {
       try {
-        const idxRes = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': '*/*',
-            'Referer': 'https://finance.yahoo.com'
-          }
-        });
-        const idxData = await idxRes.json();
-        const idxResult = idxData?.chart?.result?.[0];
-        const meta = idxResult?.meta;
-        const val = meta?.regularMarketPrice || meta?.previousClose;
-        if (val) prices[key] = val;
-        let idxPc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
-        if (!idxPc) {
-          idxPc = derivePrevCloseFromCandles(meta, idxResult);
+        if (market === 'us') {
+          const { val, count, history: h } = await withRetry(() => fetchDividendUs(code), maxAttempts, deadline);
+          dividends[code] = val; // 0も含めて「取得成功」
+          counts[code] = count;
+          if (h && h.length) history[code] = h;
+        } else {
+          const { val, month, history: h } = await withRetry(() => fetchDividendJp(code), maxAttempts, deadline);
+          dividends[code] = val; // 0も含めて「取得成功」
+          if (month != null) months[code] = month;
+          if (h && h.length) history[code] = h;
         }
-        if (idxPc) prevClose[key] = idxPc;
-      } catch(e) {
-        console.warn(`Index fetch failed (${key}):`, e.message);
+      } catch (e) {
+        errors[code] = e.message;
       }
-    }
+    }, concurrency);
 
-    // 株価取得（現在値 + 前日終値）
-    for (const { code, market } of (codes || [])) {
-      try {
-        const symbol = market === 'jp' ? code + '.T' : code;
-        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=5d`;
-        const res = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': '*/*',
-            'Referer': 'https://finance.yahoo.com'
-          }
-        });
-        const data = await res.json();
-        const result = data?.chart?.result?.[0];
-        const meta = result?.meta;
-        const price = meta?.regularMarketPrice || meta?.previousClose;
-        if (price) prices[code] = price;
-        // previousClose: まずmetaのフィールドを試し、無ければ日足終値配列から推定
-        let pc = meta?.previousClose || meta?.chartPreviousClose || meta?.regularMarketPreviousClose;
-        if (!pc) {
-          pc = derivePrevCloseFromCandles(meta, result);
-        }
-        if (pc) prevClose[code] = pc;
-      } catch(e) {
-        console.warn(`Failed ${code}:`, e.message);
-      }
-      await new Promise(r => setTimeout(r, 300));
-    }
-
-    return { statusCode: 200, headers, body: JSON.stringify({ prices, prevClose }) };
-  } catch(e) {
+    return { statusCode: 200, headers, body: JSON.stringify({ dividends, months, counts, history, errors }) };
+  } catch (e) {
     return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
   }
 };
