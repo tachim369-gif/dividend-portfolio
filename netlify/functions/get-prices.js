@@ -66,12 +66,13 @@ exports.handler = async function(event) {
       console.warn('FX fetch failed:', e.message);
     }
 
-    // 主要指数取得（日経平均・NYダウ・S&P500・NY金先物）
+    // 主要指数取得（日経平均・NYダウ・S&P500・NY金先物・WTI原油）
     const indices = [
       { key: 'N225', symbol: '^N225' },
       { key: 'DJI', symbol: '^DJI' },
       { key: 'SP500', symbol: '^GSPC' },
-      { key: 'GOLD', symbol: 'GC=F' }
+      { key: 'GOLD', symbol: 'GC=F' },
+      { key: 'WTIOIL', symbol: 'CL=F' }
     ];
     for (const { key, symbol } of indices) {
       try {
