@@ -455,6 +455,14 @@ input[type="number"]{-moz-appearance:textfield;}
             <td style="padding:8px 10px;text-align:right;font-family:var(--mono);color:var(--text);" id="ay-mkt">—</td>
           </tr>
           <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 10px;color:var(--text2);">預り金（¥）</td>
+            <td style="padding:8px 10px;text-align:right;font-family:var(--mono);color:var(--text);" id="ay-cash">—</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 10px;color:var(--text2);"><b>運用価額（¥）</b></td>
+            <td style="padding:8px 10px;text-align:right;font-family:var(--mono);color:var(--text);font-weight:700;" id="ay-mgmt">—</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
             <td style="padding:8px 10px;color:var(--text2);">投資収益（¥）</td>
             <td style="padding:8px 10px;text-align:right;font-family:var(--mono);color:var(--text);" id="ay-gain">—</td>
           </tr>
@@ -1412,12 +1420,13 @@ function closeYieldMgmtOut(e){if(e.target===document.getElementById('yieldmgmt-o
 function calcAccountYield(){
   const fx=getFx();
   const mktAll=portfolio.reduce((s,r)=>r.shares&&r.mktPrice?s+(r.market==='us'?r.shares*r.mktPrice*fx:r.shares*r.mktPrice):s,0);
+  const mgmtTotal=mktAll+depositJpy;
   const investTotal=acctDeposit+acctTransfer;
-  const gain=mktAll-investTotal;
+  const gain=mgmtTotal-investTotal;
   const gainAfter=gain>=0?gain*(1-0.20315):gain;
   const yld=investTotal>0?(gain/investTotal*100):null;
   const yldAfter=investTotal>0?(gainAfter/investTotal*100):null;
-  return {mktAll,investTotal,gain,gainAfter,yld,yldAfter};
+  return {mktAll,mgmtTotal,investTotal,gain,gainAfter,yld,yldAfter};
 }
 function refreshAccountYieldCard(){
   const {yld,yldAfter}=calcAccountYield();
@@ -1439,9 +1448,11 @@ function openAccountYieldModal(){
 function updateAccountYield(){
   acctDeposit=parseFloat(document.getElementById('ay-deposit-input').value.replace(/,/g,''))||0;
   save();
-  const {mktAll,investTotal,gain,yld}=calcAccountYield();
+  const {mktAll,mgmtTotal,investTotal,gain,yld}=calcAccountYield();
   document.getElementById('ay-total').textContent=fmtJpy(investTotal);
   document.getElementById('ay-mkt').textContent=fmtJpy(mktAll);
+  document.getElementById('ay-cash').textContent=fmtJpy(depositJpy);
+  document.getElementById('ay-mgmt').textContent=fmtJpy(mgmtTotal);
   const gainEl=document.getElementById('ay-gain');
   gainEl.textContent=(gain<0?'-':'')+fmtJpy(Math.abs(gain));
   gainEl.style.color=gain>=0?'var(--gain-up)':'var(--gain-down)';
